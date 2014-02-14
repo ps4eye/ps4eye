@@ -6,6 +6,17 @@ These tools are still in development and may not allow for
 complete, if any, functionality of the camera. The PS4 camera
 is USB 3.0 only and is not compatible with USB 2.0 systems.
 
+## Requirements
+
+Pyusb 1.0 is required and may not be available through
+the package manager of some systems. Python-pip may help in
+installing the most recent version of pyusb:
+
+...
+sudo apt-get install python-pip  # on apt based systems
+sudo pip install --pre pyusb
+...
+
 ## Usage
 
 * Ensure that the uninitialized camera is recognized:
