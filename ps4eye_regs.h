@@ -845,7 +845,7 @@
 
 
 
-/*USB COMMAND AND DEVICES SUBADDRES*/ 
+/*USB bRequest AND DEVICES SUBADDRES*/ 
 /*SEND WRITE FROM HOST TO DEVICE*/
 #define USB_CMD_W_REG 						0xb4  
 /*SEND READ FROM HOST TO DEVICE*/ 
@@ -857,6 +857,10 @@
 #define OV9713_SENSOR1_SUBADDR				0x01
 #define OV9713_SENSOR2_SUBADDR				0x02
 /*subaddress to read/write registers from/to AK5703 A/D converter*/
-#define AK5703_SUBADDR						0x02
+#define AK5703_SUBADDR						0x24
+/*TODO DISCOVER WHICH DEVICE FOR THESE PERHAPS AC IS EEPROM 4G51A*/
+#define UNKNOWN30							0x30
+#define UNKNOWNAC							0xac
+
 
 
