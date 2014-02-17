@@ -24,8 +24,9 @@ sudo pip install --pre pyusb
 ```
 With OSX environments(tested on Mavericks):
 ```
-sudo macport install libusb  # macport must be previously installed check https://github.com/bigboss-ps3dev/ps3dev-mountain-lion to install macport and packages needed 
-sudo python setup.py installcd pyusb #pyusb must be previouusly downloaded http://sourceforge.net/projects/pyusb/files/PyUSB%201.0/1.0.0-beta-1/pyusb-1.0.0b1.zip/download
+sudo port install libusb  # macport must be previously installed check https://github.com/bigboss-ps3dev/ps3dev-mountain-lion to install macport and packages needed 
+sudo port select --list python  #check python version available . python27 is fine.
+sudo python setup.py install  #pyusb must be previouusly downloaded http://sourceforge.net/projects/pyusb/files/PyUSB%201.0/1.0.0-beta-1/pyusb-1.0.0b1.zip/download
 export DYLD_LIBRARY_PATH=/opt/local/lib:$DYLD_LIBRARY_PATH #you will need this with macport to use libusb from pyusb
 ```
 
