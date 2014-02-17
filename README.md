@@ -30,7 +30,7 @@ sudo python setup.py install  #pyusb must be previouusly downloaded http://sourc
 export DYLD_LIBRARY_PATH=/opt/local/lib:$DYLD_LIBRARY_PATH #you will need this with macport to use libusb from pyusb
 ```
 
-optional for OSX:
+Optional for OSX:
 ```
 mkdir usbutils
 cd usbutils
@@ -329,6 +329,13 @@ Device Status:     0x0f0c
   U1 Enabled
   U2 Enabled
 ```
+## PlayStation 4 Camera chips
+PlayStation 4 Camera has:
 
+	OV580 asic from Omnivision is a usb bridge and control all other chips. 
+	OV9713 sensor camera from omnivision. It has 2. 
+	5703 A/D converter from AKM. 
+	4g51A eeprom sop-j8 package from ROHM?
+	...
 ## See Also
 http://ps4eye.tumblr.com/
