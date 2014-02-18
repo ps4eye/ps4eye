@@ -6,17 +6,41 @@ These tools are still in development and may not allow for
 complete, if any, functionality of the camera. The PS4 camera
 is USB 3.0 only and is not compatible with USB 2.0 systems.
 
+Credits
+-------
+	ps4eye		- Founder, Author
+	bigboss		- Author
+
 ## Requirements
 
 Pyusb 1.0 is required and may not be available through
 the package manager of some systems. Python-pip may help in
 installing the most recent version of pyusb:
 
+With Linux environments:
 ```
 $ sudo apt-get install python-pip  # on apt based systems
 $ sudo pip install --pre pyusb
 ```
+With OSX environments(tested on Mavericks):
+```
+sudo port install libusb  # macport must be previously installed check https://github.com/bigboss-ps3dev/ps3dev-mountain-lion to install macport and packages needed 
+sudo port select --list python  #check python version available . python27 is fine.
+sudo python setup.py install  #pyusb must be previouusly downloaded http://sourceforge.net/projects/pyusb/files/PyUSB%201.0/1.0.0-beta-1/pyusb-1.0.0b1.zip/download
+export DYLD_LIBRARY_PATH=/opt/local/lib:$DYLD_LIBRARY_PATH #you will need this with macport to use libusb from pyusb
+```
 
+Optional for OSX:
+```
+mkdir usbutils
+cd usbutils
+wget http://picusb.googlecode.com/files/usbutils-006_macosx_lion.zip
+unzip usbutils-006_macosx_lion.zip
+cd usbutils-006
+./configure
+make clean
+make # you will have lsusb command compiled
+```
 ## Usage
 
 * Ensure that the uninitialized camera is recognized:
@@ -305,6 +329,13 @@ Device Status:     0x0f0c
   U1 Enabled
   U2 Enabled
 ```
+## PlayStation 4 Camera chips
+PlayStation 4 Camera has:
 
+	OV580 asic from Omnivision is a usb bridge and control all other chips. 
+	OV9713 sensor camera from omnivision. It has 2. 
+	5703 A/D converter from AKM. 
+	4g51A eeprom sop-j8 package from ROHM?
+	...
 ## See Also
 http://ps4eye.tumblr.com/
