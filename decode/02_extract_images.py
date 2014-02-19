@@ -39,17 +39,20 @@ if __name__ == "__main__":
 
     print "File size: %d, (0x%08x)" % (file_size, file_size)
 
+    line_number = 1
     while f.tell() < file_size:
         unknown_header = f.read(32)
         unknown_data = f.read(64)
 
         image1_data = f.read(1280*2)
-        image1.write(image1_data)
-
         image2_data = f.read(1280*2)
-        image2.write(image2_data)
+
+        if (line_number > 3):
+          image1.write(image1_data)
+          image2.write(image2_data)
 
         other_unknown_data = f.read(840)
+        line_number += 1
 
     image1.close()
     image2.close()
