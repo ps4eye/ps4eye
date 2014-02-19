@@ -11,16 +11,10 @@ HEIGHT=800
 FORMAT="yuyv422"
 #FORMAT="gray16be"
 #FORMAT="y400a"
-for X in 1; do
-    ffmpeg \
-        -y -vcodec rawvideo -f rawvideo -pix_fmt ${FORMAT} \
-        -s ${WIDTH}x${HEIGHT} -i raw_image1.bin -vcodec png image${X}.png
-done
-FORMAT="gray16le"
-for X in 2; do
-    ffmpeg \
-        -y -vcodec rawvideo -f rawvideo -pix_fmt ${FORMAT} \
-        -s ${WIDTH}x${HEIGHT} -i raw_image${X}.bin -f image2 -pix_fmt gray16 image${X}.png
+for X in 1 2; do
+    avconv \
+        -vframes 1 -vcodec rawvideo -f rawvideo -pix_fmt ${FORMAT} \
+        -s ${WIDTH}x${HEIGHT} -i raw_image${X}.bin -vcodec png image${X}.png
 done
 
 # -original gstreamer code by ao2

@@ -21,6 +21,7 @@
 # The images are hence 1280 * 800 * 2 bytes, at 2 bytes per pixel.
 
 import struct
+from array import array
 
 def dump(f, fmt):
     length = struct.calcsize(fmt)
@@ -39,21 +40,30 @@ if __name__ == "__main__":
 
     print "File size: %d, (0x%08x)" % (file_size, file_size)
 
-    line_number = 1
+    row_image1 = 0
+    row_image2 = 0
+    row = 0
+    null_row = chr(0x00) * 1280*2
+
     while f.tell() < file_size:
+        row += 1
         unknown_header = f.read(32)
         unknown_data = f.read(64)
+        #print ''.join('{:02x} '.format(x) for x in array("B",unknown_header))
+        #print ''.join('{:02x} '.format(x) for x in array("B",unknown_data)[0::2])
 
         image1_data = f.read(1280*2)
-        image2_data = f.read(1280*2)
+        if image1_data != null_row and row_image1 < 800:
+            row_image1 += 1
+            image1.write(image1_data)
 
-        if (line_number > 3 and line_number <= 803):
-          image1.write(image1_data)
-        if (line_number <= 800):
-          image2.write(image2_data)
+        image2_data = f.read(1280*2)
+        if image2_data != null_row and row_image2 < 800:
+            row_image2 += 1
+            image2.write(image2_data)
 
         other_unknown_data = f.read(840)
-        line_number += 1
+        #print ''.join('{:02x} '.format(x) for x in array("B",other_unknown_data))
 
     image1.close()
     image2.close()
