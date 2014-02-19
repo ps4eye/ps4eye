@@ -47,8 +47,9 @@ if __name__ == "__main__":
         image1_data = f.read(1280*2)
         image2_data = f.read(1280*2)
 
-        if (line_number > 3):
+        if (line_number > 3 and line_number <= 803):
           image1.write(image1_data)
+        if (line_number <= 800):
           image2.write(image2_data)
 
         other_unknown_data = f.read(840)
