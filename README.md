@@ -333,8 +333,13 @@ http://ps4eye.tumblr.com/
 
 http://www.psdevwiki.com/ps4/PlayStation_4_Camera
 
+## Contact
+Mail: ps4eye@gmail.com
+
+IRC: irc.freenode.net#ps4eye or irc.efnet.org#ps4dev
+
 ## Credits
-ps4eye/ew, ao2, bigboss
+ps4eye/ew, marshallh, ao2, bigboss
 
 ## Special Thanks
 http://www.heatsynclabs.org/
