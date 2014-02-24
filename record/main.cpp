@@ -3,6 +3,10 @@
 
 #include "ps4eye.h"
 
+// Example code taken from
+//  http://blog.matthias.roehser.de/?p=97
+//  by Matthias Röhser
+
 using namespace std;
 
 static ps4eye *ps4cam = NULL;

@@ -111,7 +111,6 @@ void ps4eye::release_usb() {
  * driver connects to the device.
  * What these commands mean is mostly unknown to me.
 
- * The most interesting part from the users point of view is setting the samplerate.
  */
 void ps4eye::init_usb() {
   // reset usb communication
@@ -134,7 +133,7 @@ void ps4eye::init_usb() {
 
   if (!commands.is_open()) {
     cout << "unable to open commands file" << endl;
-    exit(-1);
+    abort = true;
   }
 
   // command #667 @ 0xbb38 turns led on
@@ -237,7 +236,7 @@ void ps4eye::callback_controlTransfer(struct libusb_transfer * transfer) {
   ps4cam->controlTransferReturned = true;
   if (ps4cam->control_wLength != transfer->actual_length) {
     cout << "ERROR: " << transfer->actual_length << " / " << ps4cam->control_wLength << " bytes transferred" << endl;
-    exit(-1);
+    ps4cam->stop();
   }
 }
 
