@@ -861,8 +861,8 @@
 /*TODO DISCOVER WHICH DEVICE FOR THESE PERHAPS AC IS EEPROM 4G51A*/
 #define UNKNOWN30_SUBADDR                 0x30
 #define C4G51A_SUBADDR                    0xac
-#define UNKNOWNFF_SUBADDR                 0xff  //? it seems ov480
-#define UNKNOWN00_SUBADDR                 0x00  //? it seems ov480
+#define UNKNOWNFF_SUBADDR                 0xff  //? it seems ov580
+#define UNKNOWN00_SUBADDR                 0x00  //? it seems ov580
 
 
 
