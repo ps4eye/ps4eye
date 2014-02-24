@@ -486,16 +486,16 @@
 #define OV9713_DEBUG_MODE_1               0x4501
 #define OV9713_DEBUG_MODE_2               0x4502
 #define OV9713_PSYNC_CTRL_13              0x4513
-/* OV9713_DEBUG_MODE        0x4514-0x4607*/
+/* OV9713_DEBUG_MODE 0x4514-0x4607*/
 #define OV9713_R_VFIFO_READ_START_HI      0x4600
 #define OV9713_R_VFIFO_READ_START_LO      0x4601
 #define OV9713_R2                         0x4602
 #define OV9713_READ_START_H               0x4608
-#define OV9713_READ_START_H               0x4609
+#define OV9713_READ_START_L               0x4609
 #define OV9713_HSYNC_START_H              0x460a
 #define OV9713_HSYNC_START_L              0x460b
 #define OV9713_HSYNC_CTRL                 0x460c
-#define OV9713_SRAM_TEST                  0x460d
+#define OV9713_SRAM_TEST1                 0x460d
 #define OV9713_MIPI_MODE2                 0x460e
 #define OV9713_IR_DETC_CTRL               0x460f
 
@@ -801,7 +801,7 @@
 #define AK5703_R1_CH_OUTPUT_DELAY_CONTROL 0x0d
 #define AK5703_RESERVED0E                 0x0e
 #define AK5703_RESERVED0F                 0x0f
-#define AK5703_POWER_MANAGEMENTA          0x10
+#define AK5703_POWER_MANAGEMENTB          0x10
 #define AK5703_RESERVED11                 0x11
 #define AK5703_SIGNAL_MIC_GAIN_SELECTB    0x12
 #define AK5703_MIC_GAIN_ADJUSTB0          0x13
@@ -844,17 +844,1533 @@
 
 /*USB bRequest AND DEVICES SUBADDRES*/
 /*SEND WRITE FROM HOST TO DEVICE*/
-#define USB_CMD_W_REG                     0xb4
+#define SET_REGISTER                      0xa4
 /*SEND READ FROM HOST TO DEVICE*/
-#define USB_CMD_R_REG_H                   0xb5
+#define GET_REGISTER_SEND                 0xa5
 /*RECEIVING READ FROM DEVICE TO HOST*/
-#define USB_CMD_R_REG_D                   0xb6
+#define GET_REGISTER_RECEIVE              0xa6
+/*SEND WRITE FROM HOST TO DEVICE WITH MULTIPLE REGISTERS WITH DIFFERENT SUBADDR?*/
+#define SET_MULTI_REGISTER                0xa7
 
 /*subaddress to read/write registers from/to camera sensors*/
 #define OV9713_SENSOR1_SUBADDR            0x01
 #define OV9713_SENSOR2_SUBADDR            0x02
+#define OV9713_SENSORS_SUBADDR            0x03
 /*subaddress to read/write registers from/to AK5703 A/D converter*/
 #define AK5703_SUBADDR                    0x24
 /*TODO DISCOVER WHICH DEVICE FOR THESE PERHAPS AC IS EEPROM 4G51A*/
-#define UNKNOWN30                         0x30
-#define UNKNOWNAC                         0xac
+#define UNKNOWN30_SUBADDR                 0x30
+#define C4G51A_SUBADDR                    0xac
+#define UNKNOWNFF_SUBADDR                 0xff  //? it seems ov480
+#define UNKNOWN00_SUBADDR                 0x00  //? it seems ov480
+
+
+
+
+
+/*
+ radix: hexadecimal
+ 02 00 00 00 00 00 00 00
+ 00 05 20 03
+ 3C 00 00 00
+ 00 05 20 03
+ 3C 00 04 00
+ 2A 00 2A 00
+ 00 00 00 00
+ 00 00 00 00
+ 00 00 00 00
+ 00 00 00 00
+ 00 00 00 00
+ 00 00 00 00
+ 00 00 00 00
+ 00 00 00 00
+ 00 00 00 00
+size 64*/
+
+static const uint16_t reg_init[][3] = {
+    { OV9713_ISP_CTRL00, 0x20 , 0x03}, //enable OTP signal, rest disabled on both sensors
+    { 0x003c, 0x00 ,0x00 },
+    { OV9713_ISP_CTRL00, 0x20 , 0x03 },
+    { 0x003c, 0x04 ,0x00},
+    { 0x002a, 0x2a, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 },
+    { 0x0000, 0x00, 0x00 }
+};
+
+/*read CHIP ID from sensor1 you will see why is ov9713 sensor :P*/
+static const uint16_t sensor1_reg_read[2]={
+    OV9713_CHIP_ID_HI,
+    OV9713_CHIP_ID_LO
+};
+/*read CHIP ID from sensor2 you will see why is ov9713 sensor :P*/
+
+static const uint16_t sensor2_reg_read[2]={
+    OV9713_CHIP_ID_HI,
+    OV9713_CHIP_ID_LO
+};
+
+/*read 0x0000 from UNKNOWN30 */
+static const uint16_t unknown30_reg_read[1]={
+    0x0000
+};
+/*read one by one from 0xfd80-0xff16 407 bytes from 4g5a subaddress AC*/
+/*static const uint16_t 4g5a_reg_read[]={
+    0xfd80,
+    0xfd81,
+    ...   ,
+    ...   ,
+    0xff16
+};*/
+
+
+/*
+03 00 00 00 00 00 00 00
+06 27 00 FF
+00 27 F0 FF
+00 FF 03 FF
+01 FF 00 FF
+02 FF 50 FF
+80 FF 03 FF
+81 FF 00 FF
+82 FF 50 FF
+size 40*/
+static const uint16_t ov580_reg_init0[][2] = {
+    { 0x2706, 0x00 },
+    { 0x2700, 0xf0 },
+    { 0xff00, 0x03 },//it seem that eeprom 4g5a can be written from subaddres FF and read from AC subaddres
+    { 0xff01, 0x00 },
+    { 0xff02, 0x50 },
+    { 0xff80, 0x03 },
+    { 0xff81, 0x00 },
+    { 0xff82, 0x50 }
+};
+/*
+03 00 00 00 00 00 00 00
+06 27 01 FF
+00 27 F0 FF
+02 27 20 FF
+/size 20*/
+static const uint16_t ov580_reg_init1[][2] = {
+    { 0x2706, 0x01 },
+    { 0x2700, 0xf0 },
+    { 0x2702, 0x20 }
+};
+/*
+ 03 00 00 00 00 00 00 00
+ 01 30 01 03
+ 12 37 7A 03
+ 03 36 63 03
+ 33 36 14 03
+ 12 30 20 03
+ 14 30 84 03
+ 1F 30 83 03
+ 20 30 02 03
+ 03 31 00 03
+ 02 3F 14 03
+ 03 3F 66 03
+ 83 45 83 03
+size 56*/
+static const uint16_t ov9713_reg_init0[][2] = {
+    { OV9713_PAD_CTRL, 0x01 },
+    { OV9713_SENSOR_CTRL_REGISTER1_2, 0x7a },
+    { OV9713_ANALOG_REGISTER0_3, 0x63 },
+    { OV9713_ANALOG_REGISTER3_3, 0x14 },
+    { OV9713_A_MIPI_PK_1, 0x20 },
+    { OV9713_MIPI_SC_O_1, 0x84 },
+    { OV9713_MISC_CTRL, 0x83 },
+    { OV9713_MISC_CTRL1, 0x02 },
+    { 0x3103, 0x00 },
+    { 0x3f02, 0x14 },
+    { 0x3f03, 0x66 },
+    { OV9713_HDR_FRAME_REG3, 0x83 }
+};
+
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 37 48 10 03
+ 62 36 10 03
+ 04 3F D0 03
+ 24 36 CC 03
+ 22 36 66 03
+ 32 36 A9 03
+ A3 30 1B 03
+ 0D 37 CC 03
+ size 40*/
+static const uint16_t ov9713_reg_init1[][2] = {
+    { OV9713_PCLK_PERIOD, 0x10 },
+    { OV9713_ANALOG_REGISTER6_2, 0x7a },
+    { 0x3f04, 0xd0 },
+    { OV9713_ANALOG_REGISTER2_4, 0xcc },
+    { OV9713_ANALOG_REGISTER2_2, 0x66 },
+    { OV9713_ANALOG_REGISTER3_2, 0xa9 },
+    { OV9713_PLL23, 0x1b },
+    { OV9713_SENSOR_CTRL_REGISTER0_13, 0xcc }
+};
+/*
+ 03 00 00 00 00 00 00 00
+ 86 11 0D FF
+ 87 11 10 FF
+ 88 11 0E FF
+ 89 11 74 FF
+ 8A 11 56 FF
+ 8B 11 8A FF
+ 8C 11 85 FF
+ 8D 11 45 FF
+ 8E 11 32 FF
+ 8F 11 66 FF
+ 90 11 4A FF
+ 91 11 F5 FF
+size 56*/
+static const uint16_t ov580_reg_init2[][2] = {
+    { 0x1186, 0x0d },
+    { 0x1187, 0x10 },
+    { 0x1188, 0x0e },
+    { 0x1189, 0x74 },
+    { 0x118a, 0x56 },
+    { 0x118b, 0x8a },
+    { 0x118c, 0x85 },
+    { 0x118d, 0x45 },
+    { 0x118e, 0x32 },
+    { 0x118f, 0x66 },
+    { 0x1190, 0x4a },
+    { 0x1191, 0xf5 }
+};
+
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 92 11 0A FF
+ 81 11 58 FF
+size 16
+ */
+static const uint16_t ov580_reg_init3[][2] = {
+    { 0x1192, 0x0a },
+    { 0x1181, 0x58 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 86 19 0D FF
+ 87 19 10 FF
+ 88 19 0E FF
+ 89 19 74 FF
+ 8A 19 56 FF
+ 8B 19 8A FF
+ 8C 19 85 FF
+ 8D 19 45 FF
+ 8E 19 32 FF
+ 8F 19 66 FF
+ 90 19 4A FF
+ 91 19 F5 FF
+ size 56*/
+static const uint16_t ov580_reg_init4[][2] = {
+    { 0x1986, 0x0d },
+    { 0x1987, 0x10 },
+    { 0x1988, 0x0e },
+    { 0x1989, 0x74 },
+    { 0x198a, 0x56 },
+    { 0x198b, 0x8a },
+    { 0x198c, 0x85 },
+    { 0x198d, 0x45 },
+    { 0x198e, 0x32 },
+    { 0x198f, 0x66 },
+    { 0x1990, 0x4a },
+    { 0x1991, 0xf5 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 92 19 0A FF
+ 81 19 58 FF
+size 16
+ */
+static const uint16_t ov580_reg_init5[][2] = {
+    { 0x1992, 0x0a },
+    { 0x1981, 0x58 },
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 11 16 FF
+ 01 11 14 FF
+ 02 11 11 FF
+ 03 11 12 FF
+ 04 11 15 FF
+ 05 11 1A FF
+ 06 11 0A FF
+ 07 11 05 FF
+ 08 11 03 FF
+ 09 11 04 FF
+ 0A 11 07 FF
+ 0B 11 0C FF
+ size 56*/
+static const uint16_t ov580_reg_init6[][2] = {
+    { 0x1100, 0x16 },
+    { 0x1101, 0x14 },
+    { 0x1102, 0x11 },
+    { 0x1103, 0x12 },
+    { 0x1104, 0x15 },
+    { 0x1105, 0x1a },
+    { 0x1106, 0x0a },
+    { 0x1107, 0x05 },
+    { 0x1108, 0x03 },
+    { 0x1109, 0x04 },
+    { 0x110a, 0x07 },
+    { 0x110b, 0x0c }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 0C 11 03 FF
+ 0D 11 01 FF
+ 0E 11 00 FF
+ 0F 11 00 FF
+ 10 11 02 FF
+ 11 11 05 FF
+ 12 11 03 FF
+ 13 11 01 FF
+ 14 11 00 FF
+ 15 11 00 FF
+ 16 11 02 FF
+ 17 11 05 FF
+ size 56*/
+static const uint16_t ov580_reg_init7[][2] = {
+    { 0x110c, 0x03 },
+    { 0x110d, 0x01 },
+    { 0x110e, 0x00 },
+    { 0x110f, 0x00 },
+    { 0x1110, 0x02 },
+    { 0x1111, 0x05 },
+    { 0x1112, 0x03 },
+    { 0x1113, 0x01 },
+    { 0x1114, 0x00 },
+    { 0x1115, 0x00 },
+    { 0x1116, 0x02 },
+    { 0x1117, 0x05 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 18 11 09 FF
+ 19 11 05 FF
+ 1A 11 03 FF
+ 1B 11 04 FF
+ 1C 11 06 FF
+ 1D 11 0C FF
+ 1E 11 16 FF
+ 1F 11 13 FF
+ 20 11 10 FF
+ 21 11 11 FF
+ 22 11 14 FF
+ 23 11 18 FF
+ size 56*/
+static const uint16_t ov580_reg_init8[][2] = {
+    { 0x1118, 0x09 },
+    { 0x1119, 0x05 },
+    { 0x111a, 0x03 },
+    { 0x111b, 0x04 },
+    { 0x111c, 0x06 },
+    { 0x111d, 0x0c },
+    { 0x111e, 0x16 },
+    { 0x111f, 0x13 },
+    { 0x1120, 0x10 },
+    { 0x1121, 0x11 },
+    { 0x1121, 0x14 },
+    { 0x1123, 0x18 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 24 11 09 FF
+ 25 11 19 FF
+ 26 11 19 FF
+ 27 11 19 FF
+ 28 11 07 FF
+ 29 11 27 FF
+ 2A 11 23 FF
+ 2B 11 22 FF
+ 2C 11 23 FF
+ 2D 11 17 FF
+ 2E 11 34 FF
+ 2F 11 31 FF
+ size 56*/
+static const uint16_t ov580_reg_init9[][2] = {
+    { 0x1124, 0x09 },
+    { 0x1115, 0x19 },
+    { 0x1126, 0x19 },
+    { 0x1127, 0x19 },
+    { 0x1128, 0x07 },
+    { 0x1129, 0x27 },
+    { 0x112a, 0x23 },
+    { 0x112b, 0x22 },
+    { 0x112c, 0x23 },
+    { 0x112d, 0x17 },
+    { 0x112e, 0x34 },
+    { 0x112f, 0x31 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 30 11 30 FF
+ 31 11 31 FF
+ 32 11 34 FF
+ 33 11 27 FF
+ 34 11 33 FF
+ 35 11 32 FF
+ 36 11 33 FF
+ 37 11 37 FF
+ 38 11 1B FF
+ 39 11 1A FF
+ 3A 11 29 FF
+ 3B 11 2A FF
+ size 56*/
+static const uint16_t ov580_reg_init10[][2] = {
+    { 0x1130, 0x30 },
+    { 0x1131, 0x31 },
+    { 0x1132, 0x34 },
+    { 0x1133, 0x27 },
+    { 0x1134, 0x33 },
+    { 0x1135, 0x32 },
+    { 0x1136, 0x33 },
+    { 0x1137, 0x37 },
+    { 0x1138, 0x1b },
+    { 0x1139, 0x1a },
+    { 0x113a, 0x29 },
+    { 0x113b, 0x2a }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 3C 11 28 FF
+ 3D 11 DF FF
+ 00 19 16 FF
+ 01 19 14 FF
+ 02 19 11 FF
+ 03 19 12 FF
+ 04 19 15 FF
+ 05 19 1A FF
+ 06 19 0A FF
+ 07 19 05 FF
+ 08 19 03 FF
+ 09 19 04 FF
+ size 56*/
+static const uint16_t ov580_reg_init11[][2] = {
+    { 0x113c, 0x28 },
+    { 0x113d, 0xdf },
+    { 0x1900, 0x16 },
+    { 0x1901, 0x14 },
+    { 0x1902, 0x11 },
+    { 0x1903, 0x12 },
+    { 0x1904, 0x15 },
+    { 0x1905, 0x1a },
+    { 0x1906, 0x0a },
+    { 0x1907, 0x05 },
+    { 0x1908, 0x03 },
+    { 0x1909, 0x04 }
+};
+/*
+ radix: hexadecimal
+03 00 00 00 00 00 00 00
+ 0A 19 07 FF
+ 0B 19 0C FF
+ 0C 19 03 FF
+ 0D 19 01 FF
+ 0E 19 00 FF
+ 0F 19 00 FF
+ 10 19 02 FF
+ 11 19 05 FF
+ 12 19 03 FF
+ 13 19 01 FF
+ 14 19 00 FF
+ 15 19 00 FF
+size 56*/
+static const uint16_t ov580_reg_init12[][2] = {
+    { 0x190a, 0x07 },
+    { 0x190b, 0x0c },
+    { 0x190c, 0x03 },
+    { 0x190d, 0x01 },
+    { 0x190e, 0x00 },
+    { 0x190f, 0x00 },
+    { 0x1910, 0x02 },
+    { 0x1911, 0x05 },
+    { 0x1912, 0x03 },
+    { 0x1913, 0x01 },
+    { 0x1914, 0x00 },
+    { 0x1915, 0x00 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 16 19 02 FF
+ 17 19 05 FF
+ 18 19 09 FF
+ 19 19 05 FF
+ 1A 19 03 FF
+ 1B 19 04 FF
+ 1C 19 06 FF
+ 1D 19 0C FF
+ 1E 19 16 FF
+ 1F 19 13 FF
+ 20 19 10 FF
+ 21 19 11 FF
+ size 56*/
+static const uint16_t ov580_reg_init13[][2] = {
+    { 0x1916, 0x02 },
+    { 0x1917, 0x05 },
+    { 0x1918, 0x09 },
+    { 0x1919, 0x05 },
+    { 0x191a, 0x03 },
+    { 0x191b, 0x04 },
+    { 0x191c, 0x06 },
+    { 0x191d, 0x0c },
+    { 0x191e, 0x16 },
+    { 0x191f, 0x13 },
+    { 0x1920, 0x10 },
+    { 0x1921, 0x11 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 22 19 14 FF
+ 23 19 18 FF
+ 24 19 09 FF
+ 25 19 19 FF
+ 26 19 19 FF
+ 27 19 19 FF
+ 28 19 07 FF
+ 29 19 27 FF
+ 2A 19 23 FF
+ 2B 19 22 FF
+ 2C 19 23 FF
+ 2D 19 17 FF
+ size 56*/
+static const uint16_t ov580_reg_init14[][2] = {
+    { 0x1922, 0x14 },
+    { 0x1923, 0x18 },
+    { 0x1924, 0x09 },
+    { 0x1925, 0x19 },
+    { 0x1926, 0x19 },
+    { 0x1927, 0x19 },
+    { 0x1928, 0x07 },
+    { 0x1928, 0x27 },
+    { 0x192a, 0x23 },
+    { 0x192b, 0x22 },
+    { 0x192c, 0x23 },
+    { 0x192d, 0x17 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 2E 19 34 FF
+ 2F 19 31 FF
+ 30 19 30 FF
+ 31 19 31 FF
+ 32 19 34 FF
+ 33 19 27 FF
+ 34 19 33 FF
+ 35 19 32 FF
+ 36 19 33 FF
+ 37 19 37 FF
+ 38 19 1B FF
+ 39 19 1A FF
+ size 56*/
+static const uint16_t ov580_reg_init15[][2] = {
+    { 0x192e, 0x34 },
+    { 0x192f, 0x31 },
+    { 0x1930, 0x30 },
+    { 0x1931, 0x31 },
+    { 0x1932, 0x34 },
+    { 0x1933, 0x27 },
+    { 0x1934, 0x33 },
+    { 0x1935, 0x32 },
+    { 0x1936, 0x33 },
+    { 0x1937, 0x37 },
+    { 0x1938, 0x1b },
+    { 0x1939, 0x1a }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 3A 19 29 FF
+ 3B 19 2A FF
+ 3C 19 28 FF
+ 3D 19 DF FF
+ size 24*/
+static const uint16_t ov580_reg_init16[][2] = {
+    { 0x193a, 0x29 },
+    { 0x193b, 0x2a },
+    { 0x193c, 0x2b },
+    { 0x193d, 0xdf }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 80 14 03 FF
+ 81 14 DE FF
+ 82 14 00 FF
+ 83 14 58 FF
+ 84 14 01 FF
+ 85 14 B9 FF
+ 86 14 00 FF
+ 87 14 F4 FF
+ 88 14 00 FF
+ 89 14 4F FF
+ 8A 14 04 FF
+ 8B 14 4F FF
+ size 56*/
+static const uint16_t ov580_reg_init17[][2] = {
+    { 0x1480, 0x03 },
+    { 0x1481, 0xde },
+    { 0x1482, 0x00 },
+    { 0x1483, 0x58 },
+    { 0x1484, 0x01 },
+    { 0x1485, 0xb9 },
+    { 0x1486, 0x00 },
+    { 0x1487, 0xf4 },
+    { 0x1488, 0x00 },
+    { 0x1489, 0x4f },
+    { 0x148a, 0x04 },
+    { 0x148b, 0x4f }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 8C 14 06 FF
+ 8D 14 A5 FF
+ 8E 14 00 FF
+ 8F 14 77 FF
+ 90 14 01 FF
+ 91 14 4E FF
+ 92 14 01 FF
+ 93 14 C7 FF
+ 94 14 00 FF
+ 95 14 6D FF
+ 96 14 04 FF
+ 97 14 AD FF
+ size 56*/
+static const uint16_t ov580_reg_init18[][2] = {
+    { 0x148c, 0x06 },
+    { 0x148d, 0xa5 },
+    { 0x148e, 0x00 },
+    { 0x148f, 0x77 },
+    { 0x1490, 0x01 },
+    { 0x1491, 0x4e },
+    { 0x1492, 0x01 },
+    { 0x1493, 0xc7 },
+    { 0x1494, 0x00 },
+    { 0x1495, 0x6d },
+    { 0x1496, 0x04 },
+    { 0x1497, 0xad }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 98 14 03 FF
+ 99 14 E2 FF
+ 9A 14 00 FF
+ 9B 14 B4 FF
+ 9C 14 00 FF
+ 9D 14 B1 FF
+ 9E 14 01 FF
+ 9F 14 D5 FF
+ A0 14 00 FF
+ A1 14 84 FF
+ A2 14 05 FF
+ A3 14 4B FF
+ size 56*/
+static const uint16_t ov580_reg_init19[][2] = {
+    { 0x1498, 0x03 },
+    { 0x1499, 0xe2 },
+    { 0x149a, 0x00 },
+    { 0x149b, 0xb4 },
+    { 0x149c, 0x00 },
+    { 0x149d, 0xb1 },
+    { 0x149e, 0x01 },
+    { 0x149f, 0xd5 },
+    { 0x14a0, 0x00 },
+    { 0x14a1, 0x84 },
+    { 0x14a2, 0x05 },
+    { 0x14a3, 0x4b }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ AE 14 10 FF
+ AF 14 00 FF
+ B0 14 00 FF
+ 80 1C 03 FF
+ 81 1C DE FF
+ 82 1C 00 FF
+ 83 1C 58 FF
+ 84 1C 01 FF
+ 85 1C B9 FF
+ 86 1C 00 FF
+ 87 1C F4 FF
+ 88 1C 00 FF
+ size 56*/
+static const uint16_t ov580_reg_init20[][2] = {
+    { 0x14ae, 0x10 },
+    { 0x14af, 0x00 },
+    { 0x14b0, 0x00 },
+    { 0x1c80, 0x03 },
+    { 0x1c81, 0xde },
+    { 0x1c82, 0x00 },
+    { 0x1c83, 0x58 },
+    { 0x1c84, 0x01 },
+    { 0x1c85, 0xb9 },
+    { 0x1c86, 0x00 },
+    { 0x1c87, 0xf4 },
+    { 0x1c88, 0x00 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 89 1C 4F FF
+ 8A 1C 04 FF
+ 8B 1C 4F FF
+ 8C 1C 06 FF
+ 8D 1C A5 FF
+ 8E 1C 00 FF
+ 8F 1C 77 FF
+ 90 1C 01 FF
+ 91 1C 4E FF
+ 92 1C 01 FF
+ 93 1C C7 FF
+ 94 1C 00 FF
+ size 56*/
+static const uint16_t ov580_reg_init21[][2] = {
+    { 0x1c89, 0x4f },
+    { 0x1c8a, 0x04 },
+    { 0x1c8b, 0x4f },
+    { 0x1c8c, 0x06 },
+    { 0x1c8d, 0xa5 },
+    { 0x1c8e, 0x00 },
+    { 0x1c8f, 0x77 },
+    { 0x1c90, 0x01 },
+    { 0x1c91, 0x4e },
+    { 0x1c92, 0x01 },
+    { 0x1c93, 0xc7 },
+    { 0x1c94, 0x00 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 95 1C 6D FF
+ 96 1C 04 FF
+ 97 1C AD FF
+ 98 1C 03 FF
+ 99 1C E2 FF
+ 9A 1C 00 FF
+ 9B 1C B4 FF
+ 9C 1C 00 FF
+ 9D 1C B1 FF
+ 9E 1C 01 FF
+ 9F 1C D5 FF
+ A0 1C 00 FF
+ size 56*/
+static const uint16_t ov580_reg_init22[][2] = {
+    { 0x1c95, 0x6d },
+    { 0x1c96, 0x04 },
+    { 0x1c97, 0xad },
+    { 0x1c98, 0x03 },
+    { 0x1c99, 0xe2 },
+    { 0x1c9a, 0x00 },
+    { 0x1c9b, 0xb4 },
+    { 0x1c9c, 0x00 },
+    { 0x1c9d, 0xb1 },
+    { 0x1c9e, 0x01 },
+    { 0x1c9f, 0xd5 },
+    { 0x1ca0, 0x00 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ A1 1C 84 FF
+ A2 1C 05 FF
+ A3 1C 4B FF
+ AE 1C 10 FF
+ AF 1C 00 FF
+ B0 1C 00 FF
+size 32*/
+static const uint16_t ov580_reg_init23[][2] = {
+    { 0x1ca1, 0x84 },
+    { 0x1ca2, 0x05 },
+    { 0x1ca3, 0x4b },
+    { 0x1cae, 0x10 },
+    { 0x1caf, 0x00 },
+    { 0x1cb0, 0x00 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 40 15 06 FF
+ 41 15 0E FF
+ 42 15 22 FF
+ 43 15 4B FF
+ 44 15 59 FF
+ 45 15 66 FF
+ 46 15 72 FF
+ 47 15 7C FF
+ 48 15 84 FF
+ 49 15 8C FF
+ 4A 15 9A FF
+ 4B 15 A5 FF
+ size 56*/
+static const uint16_t ov580_reg_init24[][2] = {
+    { 0x1540, 0x06 },
+    { 0x1541, 0x0e },
+    { 0x1542, 0x22 },
+    { 0x1543, 0x4b },
+    { 0x1544, 0x59 },
+    { 0x1545, 0x66 },
+    { 0x1546, 0x72 },
+    { 0x1547, 0x7c },
+    { 0x1548, 0x84 },
+    { 0x1549, 0x8c },
+    { 0x154a, 0x9a },
+    { 0x154b, 0xa5 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 4C 15 B5 FF
+ 4D 15 C3 FF
+ 4E 15 D6 FF
+ 00 15 06 FF
+ 01 15 0E FF
+ 02 15 22 FF
+ 03 15 4B FF
+ 04 15 59 FF
+ 05 15 66 FF
+ 06 15 72 FF
+ 07 15 7C FF
+ 08 15 84 FF
+ size 56*/
+static const uint16_t ov580_reg_init25[][2] = {
+    { 0x154c, 0xb5 },
+    { 0x154d, 0xc3 },
+    { 0x154e, 0xd6 },
+    { 0x1500, 0x06 },
+    { 0x1501, 0x0e },
+    { 0x1502, 0x22 },
+    { 0x1503, 0x4b },
+    { 0x1504, 0x59 },
+    { 0x1505, 0x66 },
+    { 0x1506, 0x72 },
+    { 0x1507, 0x7c },
+    { 0x1508, 0x84 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 09 15 8C FF
+ 0A 15 9A FF
+ 0B 15 A5 FF
+ 0C 15 B5 FF
+ 0D 15 C3 FF
+ 0E 15 D6 FF
+ 40 1D 06 FF
+ 41 1D 0E FF
+ 42 1D 22 FF
+ 43 1D 4B FF
+ 44 1D 59 FF
+ 45 1D 66 FF
+ size 56*/
+static const uint16_t ov580_reg_init26[][2] = {
+    { 0x1509, 0x8c },
+    { 0x150a, 0x9a },
+    { 0x150b, 0xa5 },
+    { 0x150c, 0xb5 },
+    { 0x150d, 0xc3 },
+    { 0x150e, 0xd6 },
+    { 0x1d40, 0x06 },
+    { 0x1d41, 0x0e },
+    { 0x1d42, 0x22 },
+    { 0x1d43, 0x4b },
+    { 0x1d44, 0x59 },
+    { 0x1d45, 0x66 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 46 1D 72 FF
+ 47 1D 7C FF
+ 48 1D 84 FF
+ 49 1D 8C FF
+ 4A 1D 9A FF
+ 4B 1D A5 FF
+ 4C 1D B5 FF
+ 4D 1D C3 FF
+ 4E 1D D6 FF
+ 00 1D 06 FF
+ 01 1D 0E FF
+ 02 1D 22 FF
+ size 56*/
+static const uint16_t ov580_reg_init27[][2] = {
+    { 0x1d46, 0x72 },
+    { 0x1d47, 0x7c },
+    { 0x1d48, 0x84 },
+    { 0x1d49, 0x8c },
+    { 0x1d4a, 0x9a },
+    { 0x1d4b, 0xa5 },
+    { 0x1d4c, 0xb5 },
+    { 0x1d4d, 0xc3 },
+    { 0x1d4e, 0xd6 },
+    { 0x1d00, 0x06 },
+    { 0x1d01, 0x0e },
+    { 0x1d02, 0x22 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 03 1D 4B FF
+ 04 1D 59 FF
+ 05 1D 66 FF
+ 06 1D 72 FF
+ 07 1D 7C FF
+ 08 1D 84 FF
+ 09 1D 8C FF
+ 0A 1D 9A FF
+ 0B 1D A5 FF
+ size 44*/
+static const uint16_t ov580_reg_init28[][2] = {
+    { 0x1d03, 0x4b },
+    { 0x1d04, 0x59 },
+    { 0x1d05, 0x66 },
+    { 0x1d06, 0x72 },
+    { 0x1d07, 0x7c },
+    { 0x1d08, 0x84 },
+    { 0x1d09, 0x8c },
+    { 0x1d0a, 0x9a },
+    { 0x1d0b, 0xa5 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 0C 1D B5 FF
+ 0D 1D C3 FF
+ 0E 1D D6 FF
+ size 20*/
+static const uint16_t ov580_reg_init29[][2] = {
+    { 0x1d0c, 0xb5 },
+    { 0x1d0d, 0xc3 },
+    { 0x1d0e, 0xd6 }
+};
+
+/*
+ radix: hexadecimal
+ 0F 00 00 00 00 00 00 00
+ 10 00 0B 30
+ 11 00 1E 30
+size 16*/
+static const uint16_t unknow30_reg_init0[][2] = {
+    { 0x0010, 0x0b },
+    { 0x0011, 0x1e }
+};
+static const uint16_t unknow30_reg_read[3] = {
+     0x0010 ,
+     0x0011 ,
+     0x0013
+};
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 00 00 0F 24
+ size 12
+ */
+static const uint8_t ak5703_reg_init0[][2] = {
+    { AK5703_POWER_MANAGEMENTA, 0x0f }
+};
+/*read AK5703_POWER_MANAGEMENTA after write*/
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 00 00 00 24
+ 10 00 00 24
+size 16*/
+static const uint8_t ak5703_reg_init1[][2] = {
+    { AK5703_POWER_MANAGEMENTA, 0x00 },
+    { AK5703_POWER_MANAGEMENTB, 0x00 },
+};
+
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 01 00 09 24
+ 02 00 C0 24
+ 03 00 C4 24
+ 04 00 04 24
+ 05 00 0B 24
+ 06 00 00 24
+ 07 00 A8 24
+ 08 00 A8 24
+ 09 00 84 24
+ 0A 00 00 24
+ 0B 00 E1 24
+ 0C 00 00 24
+ size 56*/
+static const uint8_t ak5703_reg_init2[][2] = {
+    { AK5703_PLL_CONTROLA, 0x09 },
+    { AK5703_SIGNAL_MIC_GAIN_SELECTA, 0xc0 },
+    { AK5703_MIC_GAIN_ADJUSTA0, 0xc4 },
+    { AK5703_MIC_GAIN_ADJUSTA1, 0x04 },
+    { AK5703_FS_SELECT_FILTER_CONTROLA, 0x0b },
+    { AK5703_CLOCK_OUTPUT_SELECTA, 0x00 },
+    { AK5703_LCH_INPUT_VOLUME_CONTROLA, 0xa8 },
+    { AK5703_RCH_INPUT_VOLUME_CONTROLA, 0xa8 },
+    { AK5703_TIMER_SELECTA, 0x84 },
+    { AK5703_ALC_MODE_CONTROLA0, 0x00 },
+    { AK5703_ALC_MODE_CONTROLA1, 0xe1 },
+    { AK5703_L1_CH_OUTPUT_DELAY_CONTROL, 0x00 }
+};
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 0D 00 00 24
+ 0E 00 00 24
+ 0F 00 00 24
+ 11 00 00 24
+ 12 00 C0 24
+ 13 00 04 24
+ 14 00 04 24
+ 15 00 00 24
+ 16 00 00 24
+ 17 00 A8 24
+ 18 00 A8 24
+ 19 00 80 24
+ size 56*/
+static const uint8_t ak5703_reg_init3[][2] = {
+    { AK5703_R1_CH_OUTPUT_DELAY_CONTROL, 0x00 },
+    { AK5703_RESERVED0E, 0x00 },
+    { AK5703_RESERVED0F, 0x00 },
+    { AK5703_RESERVED11, 0x00 },
+    { AK5703_SIGNAL_MIC_GAIN_SELECTB, 0xc0 },
+    { AK5703_MIC_GAIN_ADJUSTB0, 0x04 },
+    { AK5703_MIC_GAIN_ADJUSTB1, 0x04 },
+    { AK5703_FILTER_CONTROLB, 0x00 },
+    { AK5703_CLOCK_OUTPUT_SELECTB, 0x00 },
+    { AK5703_LCH_INPUT_VOLUME_CONTROLB, 0xa8 },
+    { AK5703_RCH_INPUT_VOLUME_CONTROLB, 0xa8 },
+    { AK5703_TIMER_SELECTB, 0x80 }
+};
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 1A 00 00 24
+ 1B 00 E1 24
+ 1C 00 00 24
+ 1D 00 00 24
+ 1E 00 00 24
+ 1F 00 00 24
+ 20 00 A9 24
+ 21 00 1F 24
+ 22 00 AD 24
+ 23 00 20 24
+ 24 00 00 24
+ 25 00 00 24
+ size 56*/
+static const uint8_t ak5703_reg_init4[][2] = {
+    { AK5703_ALC_MODE_CONTROLB0, 0x00 },
+    { AK5703_ALC_MODE_CONTROLB1, 0xe1 },
+    { AK5703_L2_CH_OUTPUT_DELAY_CONTROL, 0x00 },
+    { AK5703_R2_CH_OUTPUT_DELAY_CONTROL, 0x00 },
+    { AK5703_RESERVED1E, 0x00 },
+    { AK5703_RESERVED1F, 0x00 },
+    { AK5703_HPFA2_COEF_0, 0xa9 },
+    { AK5703_HPFA2_COEF_1, 0x1f },
+    { AK5703_HPFA2_COEF_2, 0xad },
+    { AK5703_HPFA2_COEF_3, 0x20 },
+    { AK5703_LPFA_COEF_0, 0x00 },
+    { AK5703_LPFA_COEF_1, 0x00 }
+};
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 26 00 00 24
+ 27 00 00 24
+ 28 00 00 24
+ 29 00 00 24
+ 2A 00 00 24
+ 2B 00 00 24
+ 2C 00 00 24
+ 2D 00 00 24
+ 2E 00 00 24
+ 2F 00 00 24
+ 30 00 A9 24
+ 31 00 1F 24
+ size 56*/
+static const uint8_t ak5703_reg_init5[][2] = {
+    { AK5703_LPFA_COEF_2, 0x00 },
+    { AK5703_LPFA_COEF_3, 0x00 },
+    { AK5703_RESERVED28, 0x00 },
+    { AK5703_RESERVED28, 0x00 },
+    { AK5703_RESERVED2A, 0x00 },
+    { AK5703_RESERVED2B, 0x00 },
+    { AK5703_RESERVED2C, 0x00 },
+    { AK5703_RESERVED2D, 0x00 },
+    { AK5703_RESERVED2E, 0xad },
+    { AK5703_RESERVED2F, 0x00 },
+    { AK5703_HPFB2_COEF_0, 0x09 },
+    { AK5703_HPFB2_COEF_1, 0x1f }
+};
+
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 32 00 AD 24
+ 33 00 20 24
+ 34 00 00 24
+ 35 00 00 24
+ 36 00 00 24
+ 37 00 00 24
+ 01 00 08 24
+ 03 00 C4 24
+ 05 00 0B 24
+ 00 00 04 24
+size 48
+ */
+static const uint8_t ak5703_reg_init6[][2] = {
+    { AK5703_HPFB2_COEF_2, 0x0d },
+    { AK5703_HPFB2_COEF_3, 0x20 },
+    { AK5703_LPFB_COEF_0, 0x00 },
+    { AK5703_LPFB_COEF_1, 0x00 },
+    { AK5703_LPFB_COEF_2, 0x00 },
+    { AK5703_LPFB_COEF_3, 0x00 },
+    { AK5703_PLL_CONTROLA, 0x08 },
+    { AK5703_MIC_GAIN_ADJUSTA0, 0xc4 },
+    { AK5703_FS_SELECT_FILTER_CONTROLA, 0x0b },
+    { AK5703_POWER_MANAGEMENTA, 0x04 }
+};
+
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 01 00 09 24
+size 12*/
+static const uint8_t ak5703_reg_init7[][2] = {
+    { AK5703_PLL_CONTROLA, 0x09 }
+};
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 00 00 0C 24
+ 10 00 08 24
+size 16*/
+static const uint8_t ak5703_reg_init8[][2] = {
+    { AK5703_POWER_MANAGEMENTA, 0x0c },
+    { AK5703_POWER_MANAGEMENTB, 0x08 }
+};
+/*
+ radix: hexadecimal
+ 0B 00 00 00 00 00 00 00
+ 02 00 C0 24
+ 07 00 A8 24
+ 08 00 A8 24
+ 12 00 C0 24
+ 17 00 A8 24
+ 18 00 A8 24
+ 00 00 0F 24
+ 10 00 0B 24
+ size 40*/
+static const uint8_t ak5703_reg_init9[][2] = {
+    { AK5703_SIGNAL_MIC_GAIN_SELECTA, 0xc0 },
+    { AK5703_LCH_INPUT_VOLUME_CONTROLA, 0xa8 },
+    { AK5703_RCH_INPUT_VOLUME_CONTROLA, 0xa8 },
+    { AK5703_SIGNAL_MIC_GAIN_SELECTB, 0xc0 },
+    { AK5703_LCH_INPUT_VOLUME_CONTROLB, 0xa8 },
+    { AK5703_RCH_INPUT_VOLUME_CONTROLB, 0xa8 },
+    { AK5703_POWER_MANAGEMENTA, 0x0f },
+    { AK5703_POWER_MANAGEMENTB, 0x0b }
+};
+
+static const uint16_t ak5703_reg_read[32]={
+      AK5703_POWER_MANAGEMENTA,
+      AK5703_PLL_CONTROLA,
+      AK5703_SIGNAL_MIC_GAIN_SELECTA,
+      AK5703_MIC_GAIN_ADJUSTA0,
+      AK5703_MIC_GAIN_ADJUSTA1,
+      AK5703_FS_SELECT_FILTER_CONTROLA,
+      AK5703_CLOCK_OUTPUT_SELECTA,
+      AK5703_LCH_INPUT_VOLUME_CONTROLA,
+      AK5703_RCH_INPUT_VOLUME_CONTROLA,
+      AK5703_TIMER_SELECTA,
+      AK5703_ALC_MODE_CONTROLA0,
+      AK5703_ALC_MODE_CONTROLA1,
+      AK5703_L1_CH_OUTPUT_DELAY_CONTROL,
+      AK5703_R1_CH_OUTPUT_DELAY_CONTROL,
+      AK5703_RESERVED0E,
+      AK5703_RESERVED0F,
+      AK5703_POWER_MANAGEMENTB,
+      AK5703_RESERVED11,
+      AK5703_SIGNAL_MIC_GAIN_SELECTB,
+      AK5703_MIC_GAIN_ADJUSTB0,
+      AK5703_MIC_GAIN_ADJUSTB1,
+      AK5703_FILTER_CONTROLB,
+      AK5703_CLOCK_OUTPUT_SELECTB,
+      AK5703_LCH_INPUT_VOLUME_CONTROLB,
+      AK5703_RCH_INPUT_VOLUME_CONTROLB,
+      AK5703_TIMER_SELECTB,
+      AK5703_ALC_MODE_CONTROLB0,
+      AK5703_ALC_MODE_CONTROLB1,
+      AK5703_L2_CH_OUTPUT_DELAY_CONTROL,
+      AK5703_R2_CH_OUTPUT_DELAY_CONTROL,
+      AK5703_RESERVED1E,
+      AK5703_RESERVED1F
+};
+
+static const uint16_t ak5703_reg_read1[22]={
+    AK5703_POWER_MANAGEMENTA,
+    AK5703_PLL_CONTROLA,
+    AK5703_SIGNAL_MIC_GAIN_SELECTA,
+    AK5703_MIC_GAIN_ADJUSTA0,
+    AK5703_MIC_GAIN_ADJUSTA1,
+    AK5703_FS_SELECT_FILTER_CONTROLA,
+    //AK5703_CLOCK_OUTPUT_SELECTA,
+    AK5703_LCH_INPUT_VOLUME_CONTROLA,
+    AK5703_RCH_INPUT_VOLUME_CONTROLA,
+    AK5703_TIMER_SELECTA,
+    AK5703_ALC_MODE_CONTROLA0,
+    //AK5703_ALC_MODE_CONTROLA1,
+    AK5703_L1_CH_OUTPUT_DELAY_CONTROL,
+    AK5703_R1_CH_OUTPUT_DELAY_CONTROL,
+    //AK5703_RESERVED0E,
+    //AK5703_RESERVED0F,
+    //AK5703_POWER_MANAGEMENTB,
+    //AK5703_RESERVED11,
+    AK5703_SIGNAL_MIC_GAIN_SELECTB,
+    AK5703_MIC_GAIN_ADJUSTB0,
+    AK5703_MIC_GAIN_ADJUSTB1,
+    AK5703_FILTER_CONTROLB,
+    //AK5703_CLOCK_OUTPUT_SELECTB,
+    AK5703_LCH_INPUT_VOLUME_CONTROLB,
+    AK5703_RCH_INPUT_VOLUME_CONTROLB,
+    AK5703_TIMER_SELECTB,
+    AK5703_ALC_MODE_CONTROLB0,
+    //AK5703_ALC_MODE_CONTROLB1,
+    AK5703_L2_CH_OUTPUT_DELAY_CONTROL,
+    AK5703_R2_CH_OUTPUT_DELAY_CONTROL,
+    //AK5703_RESERVED1E,
+    //AK5703_RESERVED1F
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ C6 15 20 FF
+ size 12*/
+
+static const uint16_t ov580_reg_init30[][2] = {
+    { 0x15c6, 0x20 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 FF 03 FF
+ size 12*/
+static const uint16_t ov580_reg_init31[][2] = {
+    { 0xff00, 0x03 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ C2 15 02 FF
+ C1 15 7F FF
+ C8 15 01 FF
+ size 20*/
+static const uint16_t ov580_reg_init32[][2] = {
+    { 0x15c2, 0x02 },
+    { 0x15c1, 0x7f },
+    { 0x15c8, 0x01 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ C3 15 40 FF
+ C4 15 40 FF
+size 16*/
+static const uint16_t ov580_reg_init33[][2] = {
+    { 0x15c3, 0x40 },
+    { 0x15c4, 0x40 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 10 FF FF
+ 01 10 FF FF
+ 00 13 18 FF
+ size 20*/
+static const uint16_t ov580_reg_init34[][2] = {
+    { 0x1000, 0xff },
+    { 0x1001, 0xff },
+    { 0x1300, 0x18 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 15 06 FF
+ 01 15 0E FF
+ 02 15 22 FF
+ 03 15 4B FF
+ 04 15 59 FF
+ 05 15 66 FF
+ 06 15 72 FF
+ 07 15 7C FF
+ 08 15 84 FF
+ 09 15 8C FF
+ 0A 15 9A FF
+ 0B 15 A5 FF
+ size 56*/
+static const uint8_t ov580_reg_init35[][2] = {
+    { 0x1500, 0x06 },
+    { 0x1501, 0x0e },
+    { 0x1502, 0x22 },
+    { 0x1503, 0x4b },
+    { 0x1504, 0x59 },
+    { 0x1505, 0x66 },
+    { 0x1506, 0x72 },
+    { 0x1507, 0x7c },
+    { 0x1508, 0x84 },
+    { 0x1509, 0x8c },
+    { 0x150a, 0x9a },
+    { 0x150b, 0xa5 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 0C 15 B5 FF
+ 0D 15 C3 FF
+ 0E 15 D6 FF
+ 40 15 06 FF
+ 41 15 0E FF
+ 42 15 22 FF
+ 43 15 4B FF
+ 44 15 59 FF
+ 45 15 66 FF
+ 46 15 72 FF
+ 47 15 7C FF
+ 48 15 84 FF
+ size 56*/
+static const uint8_t ov580_reg_init36[][2] = {
+    { 0x150c, 0xb5 },
+    { 0x150d, 0xc3 },
+    { 0x150e, 0xd6 },
+    { 0x1540, 0x06 },
+    { 0x1541, 0x0e },
+    { 0x1542, 0x22 },
+    { 0x1543, 0x4b },
+    { 0x1544, 0x59 },
+    { 0x1545, 0x66 },
+    { 0x1546, 0x72 },
+    { 0x1547, 0x7c },
+    { 0x1548, 0x84 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 49 15 8C FF
+ 4A 15 9A FF
+ 4B 15 A5 FF
+ 4C 15 B5 FF
+ 4D 15 C3 FF
+ 4E 15 D6 FF
+size 32*/
+static const uint8_t ov580_reg_init37[][2] = {
+    { 0x1549, 0x8c },
+    { 0x154a, 0x9a },
+    { 0x154b, 0xa5 },
+    { 0x154c, 0xb5 },
+    { 0x154d, 0xc3 },
+    { 0x154e, 0xd6 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 0A 14 00 FF
+ 0B 14 08 FF
+ 00 14 70 FF
+ 0C 14 80 FF
+ 0D 14 FF FF
+ 0E 14 80 FF
+ 0F 14 81 FF
+ size 36*/
+static const uint8_t ov580_reg_init38[][2] = {
+    { 0x140a, 0x00 },
+    { 0x140b, 0x08 },
+    { 0x1400, 0x70 },
+    { 0x140c, 0x80 },
+    { 0x140d, 0xff },
+    { 0x140e, 0x80 },
+    { 0x140f, 0x81 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 FF 03 FF
+ size 12*/
+static const uint16_t ov580_reg_init39[][2] = {
+    { 0xff00, 0x03 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ C6 15 20 FF
+ size 12*/
+static const uint16_t ov580_reg_init40[][2] = {
+    { 0x15c6, 0x20 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 FF 03 FF
+ size 12*/
+static const uint16_t ov580_reg_init41[][2] = {
+    { 0xff00, 0x03 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ C2 15 02 FF
+ C1 15 7F FF
+ C8 15 01 FF
+size 20*/
+static const uint16_t ov580_reg_init42[][2] = {
+    { 0x15c2, 0x02 },
+    { 0x15c1, 0x7f },
+    { 0x15c8, 0x01 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ C3 15 40 FF
+ C4 15 40 FF
+size 16*/
+static const uint16_t ov580_reg_init43[][2] = {
+    { 0x15c3, 0x40 },
+    { 0x15c4, 0x40 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 10 FF FF
+ 01 10 FF FF
+ 00 13 18 FF
+ size 20*/
+static const uint16_t ov580_reg_init44[][2] = {
+    { 0x1000, 0xff },
+    { 0x1001, 0xff },
+    { 0x1300, 0x18 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 15 06 FF
+ 01 15 0E FF
+ 02 15 22 FF
+ 03 15 4B FF
+ 04 15 59 FF
+ 05 15 66 FF
+ 06 15 72 FF
+ 07 15 7C FF
+ 08 15 84 FF
+ 09 15 8C FF
+ 0A 15 9A FF
+ 0B 15 A5 FF
+ size 56*/
+static const uint8_t ov580_reg_init45[][2] = {
+    { 0x1500, 0x06 },
+    { 0x1501, 0x0e },
+    { 0x1502, 0x22 },
+    { 0x1503, 0x4b },
+    { 0x1504, 0x59 },
+    { 0x1505, 0x66 },
+    { 0x1506, 0x72 },
+    { 0x1507, 0x7c },
+    { 0x1508, 0x84 },
+    { 0x1509, 0x8c },
+    { 0x150a, 0x9a },
+    { 0x150b, 0xa5 }
+};
+/*
+radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 0C 15 B5 FF
+ 0D 15 C3 FF
+ 0E 15 D6 FF
+ 40 15 06 FF
+ 41 15 0E FF
+ 42 15 22 FF
+ 43 15 4B FF
+ 44 15 59 FF
+ 45 15 66 FF
+ 46 15 72 FF
+ 47 15 7C FF
+ 48 15 84 FF
+size 56*/
+static const uint8_t ov580_reg_init46[][2] = {
+    { 0x150c, 0xb5 },
+    { 0x150d, 0xc3 },
+    { 0x150e, 0xd6 },
+    { 0x1540, 0x06 },
+    { 0x1541, 0x0e },
+    { 0x1542, 0x22 },
+    { 0x1543, 0x4b },
+    { 0x1544, 0x59 },
+    { 0x1545, 0x66 },
+    { 0x1546, 0x72 },
+    { 0x1547, 0x7c },
+    { 0x1548, 0x84 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 49 15 8C FF
+ 4A 15 9A FF
+ 4B 15 A5 FF
+ 4C 15 B5 FF
+ 4D 15 C3 FF
+ 4E 15 D6 FF
+size 32*/
+static const uint8_t ov580_reg_init47[][2] = {
+    { 0x1549, 0x8c },
+    { 0x154a, 0x9a },
+    { 0x154b, 0xa5 },
+    { 0x154c, 0xb5 },
+    { 0x154d, 0xc3 },
+    { 0x154e, 0xd6 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 0A 14 00 FF
+ 0B 14 08 FF
+ 00 14 70 FF
+ 0C 14 80 FF
+ 0D 14 FF FF
+ 0E 14 80 FF
+ 0F 14 81 FF
+ size 36*/
+static const uint8_t ov580_reg_init48[][2] = {
+    { 0x140a, 0x00 },
+    { 0x140b, 0x08 },
+    { 0x1400, 0x70 },
+    { 0x140c, 0x80 },
+    { 0x140d, 0xff },
+    { 0x140e, 0x80 },
+    { 0x140f, 0x81 }
+};
+/*
+ radix: hexadecimal
+ 03 00 00 00 00 00 00 00
+ 00 FF 03 FF
+ size 12*/
+static const uint16_t ov580_reg_init49[][2] = {
+    { 0xff00, 0x03 }
+};
+
