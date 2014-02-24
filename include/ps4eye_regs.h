@@ -869,7 +869,6 @@
 
 
 /*
- radix: hexadecimal
  02 00 00 00 00 00 00 00
  00 05 20 03
  3C 00 00 00
@@ -993,7 +992,6 @@ static const uint16_t ov9713_reg_init0[][2] = {
 };
 
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  37 48 10 03
  62 36 10 03
@@ -1045,7 +1043,6 @@ static const uint16_t ov580_reg_init2[][2] = {
 };
 
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  92 11 0A FF
  81 11 58 FF
@@ -1056,7 +1053,6 @@ static const uint16_t ov580_reg_init3[][2] = {
     { 0x1181, 0x58 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  86 19 0D FF
  87 19 10 FF
@@ -1086,7 +1082,6 @@ static const uint16_t ov580_reg_init4[][2] = {
     { 0x1991, 0xf5 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  92 19 0A FF
  81 19 58 FF
@@ -1097,7 +1092,6 @@ static const uint16_t ov580_reg_init5[][2] = {
     { 0x1981, 0x58 },
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 11 16 FF
  01 11 14 FF
@@ -1127,7 +1121,6 @@ static const uint16_t ov580_reg_init6[][2] = {
     { 0x110b, 0x0c }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  0C 11 03 FF
  0D 11 01 FF
@@ -1157,7 +1150,6 @@ static const uint16_t ov580_reg_init7[][2] = {
     { 0x1117, 0x05 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  18 11 09 FF
  19 11 05 FF
@@ -1187,7 +1179,6 @@ static const uint16_t ov580_reg_init8[][2] = {
     { 0x1123, 0x18 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  24 11 09 FF
  25 11 19 FF
@@ -1217,7 +1208,6 @@ static const uint16_t ov580_reg_init9[][2] = {
     { 0x112f, 0x31 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  30 11 30 FF
  31 11 31 FF
@@ -1247,7 +1237,6 @@ static const uint16_t ov580_reg_init10[][2] = {
     { 0x113b, 0x2a }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  3C 11 28 FF
  3D 11 DF FF
@@ -1277,8 +1266,7 @@ static const uint16_t ov580_reg_init11[][2] = {
     { 0x1909, 0x04 }
 };
 /*
- radix: hexadecimal
-03 00 00 00 00 00 00 00
+ 03 00 00 00 00 00 00 00
  0A 19 07 FF
  0B 19 0C FF
  0C 19 03 FF
@@ -1307,7 +1295,6 @@ static const uint16_t ov580_reg_init12[][2] = {
     { 0x1915, 0x00 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  16 19 02 FF
  17 19 05 FF
@@ -1337,7 +1324,6 @@ static const uint16_t ov580_reg_init13[][2] = {
     { 0x1921, 0x11 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  22 19 14 FF
  23 19 18 FF
@@ -1367,7 +1353,6 @@ static const uint16_t ov580_reg_init14[][2] = {
     { 0x192d, 0x17 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  2E 19 34 FF
  2F 19 31 FF
@@ -1397,7 +1382,6 @@ static const uint16_t ov580_reg_init15[][2] = {
     { 0x1939, 0x1a }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  3A 19 29 FF
  3B 19 2A FF
@@ -1411,7 +1395,6 @@ static const uint16_t ov580_reg_init16[][2] = {
     { 0x193d, 0xdf }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  80 14 03 FF
  81 14 DE FF
@@ -1441,7 +1424,6 @@ static const uint16_t ov580_reg_init17[][2] = {
     { 0x148b, 0x4f }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  8C 14 06 FF
  8D 14 A5 FF
@@ -1471,7 +1453,6 @@ static const uint16_t ov580_reg_init18[][2] = {
     { 0x1497, 0xad }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  98 14 03 FF
  99 14 E2 FF
@@ -1501,7 +1482,6 @@ static const uint16_t ov580_reg_init19[][2] = {
     { 0x14a3, 0x4b }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  AE 14 10 FF
  AF 14 00 FF
@@ -1531,7 +1511,6 @@ static const uint16_t ov580_reg_init20[][2] = {
     { 0x1c88, 0x00 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  89 1C 4F FF
  8A 1C 04 FF
@@ -1561,7 +1540,6 @@ static const uint16_t ov580_reg_init21[][2] = {
     { 0x1c94, 0x00 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  95 1C 6D FF
  96 1C 04 FF
@@ -1591,7 +1569,6 @@ static const uint16_t ov580_reg_init22[][2] = {
     { 0x1ca0, 0x00 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  A1 1C 84 FF
  A2 1C 05 FF
@@ -1609,7 +1586,6 @@ static const uint16_t ov580_reg_init23[][2] = {
     { 0x1cb0, 0x00 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  40 15 06 FF
  41 15 0E FF
@@ -1639,7 +1615,6 @@ static const uint16_t ov580_reg_init24[][2] = {
     { 0x154b, 0xa5 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  4C 15 B5 FF
  4D 15 C3 FF
@@ -1669,7 +1644,6 @@ static const uint16_t ov580_reg_init25[][2] = {
     { 0x1508, 0x84 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  09 15 8C FF
  0A 15 9A FF
@@ -1699,7 +1673,6 @@ static const uint16_t ov580_reg_init26[][2] = {
     { 0x1d45, 0x66 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  46 1D 72 FF
  47 1D 7C FF
@@ -1729,7 +1702,6 @@ static const uint16_t ov580_reg_init27[][2] = {
     { 0x1d02, 0x22 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  03 1D 4B FF
  04 1D 59 FF
@@ -1753,7 +1725,6 @@ static const uint16_t ov580_reg_init28[][2] = {
     { 0x1d0b, 0xa5 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  0C 1D B5 FF
  0D 1D C3 FF
@@ -1766,7 +1737,6 @@ static const uint16_t ov580_reg_init29[][2] = {
 };
 
 /*
- radix: hexadecimal
  0F 00 00 00 00 00 00 00
  10 00 0B 30
  11 00 1E 30
@@ -1781,7 +1751,6 @@ static const uint16_t unknow30_reg_read[3] = {
      0x0013
 };
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  00 00 0F 24
  size 12
@@ -1791,7 +1760,6 @@ static const uint8_t ak5703_reg_init0[][2] = {
 };
 /*read AK5703_POWER_MANAGEMENTA after write*/
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  00 00 00 24
  10 00 00 24
@@ -1802,7 +1770,6 @@ static const uint8_t ak5703_reg_init1[][2] = {
 };
 
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  01 00 09 24
  02 00 C0 24
@@ -1832,7 +1799,6 @@ static const uint8_t ak5703_reg_init2[][2] = {
     { AK5703_L1_CH_OUTPUT_DELAY_CONTROL, 0x00 }
 };
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  0D 00 00 24
  0E 00 00 24
@@ -1862,7 +1828,6 @@ static const uint8_t ak5703_reg_init3[][2] = {
     { AK5703_TIMER_SELECTB, 0x80 }
 };
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  1A 00 00 24
  1B 00 E1 24
@@ -1892,7 +1857,6 @@ static const uint8_t ak5703_reg_init4[][2] = {
     { AK5703_LPFA_COEF_1, 0x00 }
 };
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  26 00 00 24
  27 00 00 24
@@ -1923,7 +1887,6 @@ static const uint8_t ak5703_reg_init5[][2] = {
 };
 
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  32 00 AD 24
  33 00 20 24
@@ -1951,7 +1914,6 @@ static const uint8_t ak5703_reg_init6[][2] = {
 };
 
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  01 00 09 24
 size 12*/
@@ -1959,7 +1921,6 @@ static const uint8_t ak5703_reg_init7[][2] = {
     { AK5703_PLL_CONTROLA, 0x09 }
 };
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  00 00 0C 24
  10 00 08 24
@@ -1969,7 +1930,6 @@ static const uint8_t ak5703_reg_init8[][2] = {
     { AK5703_POWER_MANAGEMENTB, 0x08 }
 };
 /*
- radix: hexadecimal
  0B 00 00 00 00 00 00 00
  02 00 C0 24
  07 00 A8 24
@@ -2061,7 +2021,6 @@ static const uint16_t ak5703_reg_read1[22]={
     //AK5703_RESERVED1F
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  C6 15 20 FF
  size 12*/
@@ -2070,7 +2029,6 @@ static const uint16_t ov580_reg_init30[][2] = {
     { 0x15c6, 0x20 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 FF 03 FF
  size 12*/
@@ -2078,7 +2036,6 @@ static const uint16_t ov580_reg_init31[][2] = {
     { 0xff00, 0x03 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  C2 15 02 FF
  C1 15 7F FF
@@ -2090,7 +2047,6 @@ static const uint16_t ov580_reg_init32[][2] = {
     { 0x15c8, 0x01 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  C3 15 40 FF
  C4 15 40 FF
@@ -2100,7 +2056,6 @@ static const uint16_t ov580_reg_init33[][2] = {
     { 0x15c4, 0x40 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 10 FF FF
  01 10 FF FF
@@ -2112,7 +2067,6 @@ static const uint16_t ov580_reg_init34[][2] = {
     { 0x1300, 0x18 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 15 06 FF
  01 15 0E FF
@@ -2142,7 +2096,6 @@ static const uint8_t ov580_reg_init35[][2] = {
     { 0x150b, 0xa5 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  0C 15 B5 FF
  0D 15 C3 FF
@@ -2172,7 +2125,6 @@ static const uint8_t ov580_reg_init36[][2] = {
     { 0x1548, 0x84 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  49 15 8C FF
  4A 15 9A FF
@@ -2190,7 +2142,6 @@ static const uint8_t ov580_reg_init37[][2] = {
     { 0x154e, 0xd6 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  0A 14 00 FF
  0B 14 08 FF
@@ -2210,7 +2161,6 @@ static const uint8_t ov580_reg_init38[][2] = {
     { 0x140f, 0x81 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 FF 03 FF
  size 12*/
@@ -2218,7 +2168,6 @@ static const uint16_t ov580_reg_init39[][2] = {
     { 0xff00, 0x03 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  C6 15 20 FF
  size 12*/
@@ -2226,7 +2175,6 @@ static const uint16_t ov580_reg_init40[][2] = {
     { 0x15c6, 0x20 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 FF 03 FF
  size 12*/
@@ -2234,7 +2182,6 @@ static const uint16_t ov580_reg_init41[][2] = {
     { 0xff00, 0x03 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  C2 15 02 FF
  C1 15 7F FF
@@ -2246,7 +2193,6 @@ static const uint16_t ov580_reg_init42[][2] = {
     { 0x15c8, 0x01 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  C3 15 40 FF
  C4 15 40 FF
@@ -2256,7 +2202,6 @@ static const uint16_t ov580_reg_init43[][2] = {
     { 0x15c4, 0x40 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 10 FF FF
  01 10 FF FF
@@ -2268,7 +2213,6 @@ static const uint16_t ov580_reg_init44[][2] = {
     { 0x1300, 0x18 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 15 06 FF
  01 15 0E FF
@@ -2298,7 +2242,6 @@ static const uint8_t ov580_reg_init45[][2] = {
     { 0x150b, 0xa5 }
 };
 /*
-radix: hexadecimal
  03 00 00 00 00 00 00 00
  0C 15 B5 FF
  0D 15 C3 FF
@@ -2328,7 +2271,6 @@ static const uint8_t ov580_reg_init46[][2] = {
     { 0x1548, 0x84 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  49 15 8C FF
  4A 15 9A FF
@@ -2346,7 +2288,6 @@ static const uint8_t ov580_reg_init47[][2] = {
     { 0x154e, 0xd6 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  0A 14 00 FF
  0B 14 08 FF
@@ -2366,7 +2307,6 @@ static const uint8_t ov580_reg_init48[][2] = {
     { 0x140f, 0x81 }
 };
 /*
- radix: hexadecimal
  03 00 00 00 00 00 00 00
  00 FF 03 FF
  size 12*/
