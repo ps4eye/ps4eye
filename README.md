@@ -30,6 +30,19 @@ make clean
 make # you will have lsusb command compiled
 ```
 
+## Disabling the UVCvideo Kernel Module
+
+It may be helpful for development purposes to disable the uvcvideo
+kernel module. As root simply add `blacklist uvcvideo` to
+`/etc/modprobe.d/blacklist.conf` and then `rmmod uvcvideo` to unload
+the already loaded module. It is then possible to initialize the
+PS4 camera without uvcvideo potentially interfering with the
+initialization process.
+
+WARNING: This will disable uvcvideo for the entire system. Be sure to
+comment or remove the entry from `blacklist.conf` after development if
+you wish to re-enable the use of other cameras.
+
 ## Usage
 
 * Ensure that the uninitialized camera is recognized:
