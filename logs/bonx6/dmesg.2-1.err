@@ -1,0 +1,34 @@
+[  566.296668] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[  566.296793] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[  566.308847] general protection fault: 0000 [#1] SMP 
+[  566.308851] Modules linked in: ctr(F) ccm(F) vmw_vsock_vmci_transport(F) vsock(F) vmw_vmci(F) rfcomm(F) bnep(F) parport_pc(F) bluetooth(F) ppdev(F) 6lowpan_iphc(F) binfmt_misc(F) snd_hda_codec_hdmi(F) dm_crypt(F) ip6t_REJECT(F) xt_hl(F) ip6t_rt(F) nf_conntrack_ipv6(F) nf_defrag_ipv6(F) ipt_REJECT(F) xt_LOG(F) xt_limit(F) joydev(F) mxm_wmi(F) xt_tcpudp(F) snd_hda_codec_realtek(F) xt_addrtype(F) snd_hda_codec_generic(F) arc4(F) nf_conntrack_ipv4(F) nf_defrag_ipv4(F) xt_conntrack(F) x86_pkg_temp_thermal(F) intel_powerclamp(F) coretemp(F) kvm_intel(F) ip6table_filter(F) iwldvm(F) ip6_tables(F) kvm(F) snd_hda_intel(F) nf_conntrack_netbios_ns(F) nf_conntrack_broadcast(F) snd_hda_codec(F) mac80211(F) crct10dif_pclmul(F) nf_nat_ftp(F) crc32_pclmul(F) snd_hwdep(F) nf_nat(F) ghash_clmulni_intel(F) snd_pcm(F) nf_conntrack_ftp(F) nf_conntrack(F) aesni_intel(F) aes_x86_64(F) iptable_filter(F) lrw(F) gf128mul(F) wacom(F) glue_helper(F) snd_seq_midi(F) ip_tables(F) iwlwifi(F) snd_seq_midi_event(F) ablk_helper(F) cryptd(F) snd_rawmidi(F) snd_seq(F) x_tables(F) microcode(F) dm_multipath(F) snd_seq_device(F) scsi_dh(F) cfg80211(F) snd_timer(F) mei_me(F) psmouse(F) rtsx_pci_ms(F) mei(F) snd(F) soundcore(F) lpc_ich(F) memstick(F) serio_raw(F) wmi(F) tpm_infineon(F) tpm_tis(F) mac_hid(F) lp(F) parport(F) btrfs(F) xor(F) raid6_pq(F) dm_mirror(F) dm_region_hash(F) dm_log(F) mmc_block(F) usbhid(F) hid(F) rtsx_pci_sdmmc(F) ahci(F) libahci(F) r8169(F) mii(F) rtsx_pci(F) video(F)
+[  566.308905] CPU: 0 PID: 3574 Comm: ps4eye Tainted: GF            3.14.0-rc4-custom #1
+[  566.308907] Hardware name: System76, Inc.                      Bonobo Extreme      /Bonobo Extreme, BIOS 4.6.5 11/13/2012
+[  566.308908] task: ffff8807ef6898e0 ti: ffff8807ee9c4000 task.ti: ffff8807ee9c4000
+[  566.308909] RIP: 0010:[<ffffffff811a568d>]  [<ffffffff811a568d>] __kmalloc+0x8d/0x190
+[  566.308914] RSP: 0018:ffff8807ee9c5d88  EFLAGS: 00010286
+[  566.308915] RAX: 0000000000000000 RBX: 0000000000000001 RCX: 0000000000004160
+[  566.308916] RDX: 000000000000415f RSI: 0000000000000000 RDI: ffffffff815601d5
+[  566.308917] RBP: ffff8807ee9c5db8 R08: 00000000000173c0 R09: ffff8807ef6ed8a0
+[  566.308918] R10: 0000000000000008 R11: 0000000000000010 R12: 5c9c03ff8ede4c0c
+[  566.308919] R13: 00000000000000d0 R14: 0000000000002000 R15: ffff8807fe003200
+[  566.308920] FS:  00007f0445f3b740(0000) GS:ffff88081ec00000(0000) knlGS:0000000000000000
+[  566.308921] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  566.308922] CR2: 000000000040300e CR3: 00000007ef4b2000 CR4: 00000000001407f0
+[  566.308922] Stack:
+[  566.308923]  ffffffff815601d5 0000000000000001 ffff8800d962e6c0 ffff8807eec0da00
+[  566.308926]  ffff8807ee9c5e50 ffff8807ef6ed8a0 ffff8807ee9c5e38 ffffffff815601d5
+[  566.308928]  ffff8807edbcd000 0000000000000246 ffff8807ee9c5e48 ffff880700000000
+[  566.308930] Call Trace:
+[  566.308935]  [<ffffffff815601d5>] ? proc_do_submiturb+0x605/0xd20
+[  566.308937]  [<ffffffff815601d5>] proc_do_submiturb+0x605/0xd20
+[  566.308939]  [<ffffffff81560f66>] usbdev_do_ioctl+0x676/0x1040
+[  566.308941]  [<ffffffff8156195e>] usbdev_ioctl+0xe/0x20
+[  566.308944]  [<ffffffff811d3220>] do_vfs_ioctl+0x2e0/0x4c0
+[  566.308946]  [<ffffffff811d3481>] SyS_ioctl+0x81/0xa0
+[  566.308948]  [<ffffffff8173eaed>] system_call_fastpath+0x1a/0x1f
+[  566.308949] Code: dc 00 00 49 8b 50 08 4d 8b 20 49 8b 40 10 4d 85 e4 0f 84 ac 00 00 00 48 85 c0 0f 84 a3 00 00 00 49 63 47 20 48 8d 4a 01 4d 8b 07 <49> 8b 1c 04 4c 89 e0 65 49 0f c7 08 0f 94 c0 84 c0 74 b9 49 63 
+[  566.308966] RIP  [<ffffffff811a568d>] __kmalloc+0x8d/0x190
+[  566.308968]  RSP <ffff8807ee9c5d88>
+[  566.308970] ---[ end trace c05c7a1fb40d2e98 ]---
+[  566.309229] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted

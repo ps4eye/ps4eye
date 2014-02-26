@@ -1,0 +1,42 @@
+[ 1226.422525] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[ 1226.422649] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[ 1226.422770] xhci_hcd 0000:00:14.0: ERROR Transfer event TRB DMA ptr not part of current TD
+[ 1226.422772] xhci_hcd 0000:00:14.0: ERROR Transfer event TRB DMA ptr not part of current TD
+[ 1226.435051] general protection fault: 0000 [#1] SMP 
+[ 1226.435053] Modules linked in: ctr(F) ccm(F) vmw_vsock_vmci_transport(F) vsock(F) vmw_vmci(F) bnep(F) rfcomm(F) bluetooth(F) parport_pc(F) ppdev(F) 6lowpan_iphc(F) binfmt_misc(F) dm_crypt(F) snd_hda_codec_hdmi(F) ip6t_REJECT(F) xt_hl(F) ip6t_rt(F) nf_conntrack_ipv6(F) nf_defrag_ipv6(F) ipt_REJECT(F) xt_LOG(F) xt_limit(F) xt_tcpudp(F) xt_addrtype(F) snd_hda_codec_realtek(F) snd_hda_codec_generic(F) joydev(F) nf_conntrack_ipv4(F) mxm_wmi(F) nf_defrag_ipv4(F) x86_pkg_temp_thermal(F) snd_hda_intel(F) intel_powerclamp(F) xt_conntrack(F) arc4(F) coretemp(F) kvm_intel(F) snd_hda_codec(F) ip6table_filter(F) snd_hwdep(F) ip6_tables(F) kvm(F) snd_pcm(F) iwldvm(F) nf_conntrack_netbios_ns(F) crct10dif_pclmul(F) crc32_pclmul(F) nf_conntrack_broadcast(F) nf_nat_ftp(F) snd_seq_midi(F) mac80211(F) ghash_clmulni_intel(F) nf_nat(F) snd_seq_midi_event(F) nf_conntrack_ftp(F) aesni_intel(F) snd_rawmidi(F) nf_conntrack(F) aes_x86_64(F) lrw(F) wacom(F) gf128mul(F) iptable_filter(F) snd_seq(F) glue_helper(F) ip_tables(F) ablk_helper(F) cryptd(F) iwlwifi(F) snd_seq_device(F) x_tables(F) snd_timer(F) psmouse(F) rtsx_pci_ms(F) snd(F) dm_multipath(F) cfg80211(F) microcode(F) soundcore(F) serio_raw(F) mei_me(F) memstick(F) scsi_dh(F) lpc_ich(F) mei(F) tpm_infineon(F) tpm_tis(F) wmi(F) mac_hid(F) lp(F) parport(F) btrfs(F) xor(F) raid6_pq(F) dm_mirror(F) dm_region_hash(F) dm_log(F) usbhid(F) hid(F) mmc_block(F) rtsx_pci_sdmmc(F) ahci(F) libahci(F) r8169(F) rtsx_pci(F) mii(F) video(F)
+[ 1226.435107] CPU: 4 PID: 3850 Comm: memcheck-amd64- Tainted: GF            3.14.0-rc4-custom #1
+[ 1226.435109] Hardware name: System76, Inc.                      Bonobo Extreme      /Bonobo Extreme, BIOS 4.6.5 11/13/2012
+[ 1226.435111] task: ffff8807be736380 ti: ffff880756808000 task.ti: ffff880756808000
+[ 1226.435112] RIP: 0010:[<ffffffff811a568d>]  [<ffffffff811a568d>] __kmalloc+0x8d/0x190
+[ 1226.435118] RSP: 0018:ffff880756809d88  EFLAGS: 00010286
+[ 1226.435119] RAX: 0000000000000000 RBX: 0000000000000001 RCX: 00000000000006b1
+[ 1226.435120] RDX: 00000000000006b0 RSI: 0000000000000000 RDI: ffffffff815601d5
+[ 1226.435121] RBP: ffff880756809db8 R08: 00000000000173c0 R09: ffff8807568f6060
+[ 1226.435122] R10: 0000000000000008 R11: 0000000000000010 R12: d93505bc80a14d0c
+[ 1226.435123] R13: 00000000000000d0 R14: 0000000000002000 R15: ffff8807fe003200
+[ 1226.435125] FS:  0000000000000000(0000) GS:ffff88081ed00000(0000) knlGS:0000000000000000
+[ 1226.435126] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[ 1226.435127] CR2: 000000000643f108 CR3: 0000000756876000 CR4: 00000000001407e0
+[ 1226.435128] Stack:
+[ 1226.435129]  ffffffff815601d5 0000000000000001 ffff8807f06360c0 ffff8807f08e9400
+[ 1226.435132]  ffff880756809e50 ffff8807568f6060 ffff880756809e38 ffffffff815601d5
+[ 1226.435135]  ffff8807f24b3800 0000000000000001 0000000000000001 ffff880700000000
+[ 1226.435137] Call Trace:
+[ 1226.435143]  [<ffffffff815601d5>] ? proc_do_submiturb+0x605/0xd20
+[ 1226.435146]  [<ffffffff815601d5>] proc_do_submiturb+0x605/0xd20
+[ 1226.435148]  [<ffffffff81560f66>] usbdev_do_ioctl+0x676/0x1040
+[ 1226.435151]  [<ffffffff8156195e>] usbdev_ioctl+0xe/0x20
+[ 1226.435154]  [<ffffffff811d3220>] do_vfs_ioctl+0x2e0/0x4c0
+[ 1226.435158]  [<ffffffff81077a4b>] ? recalc_sigpending+0x1b/0x50
+[ 1226.435160]  [<ffffffff81078362>] ? __set_task_blocked+0x32/0x70
+[ 1226.435163]  [<ffffffff811d3481>] SyS_ioctl+0x81/0xa0
+[ 1226.435166]  [<ffffffff8173eaed>] system_call_fastpath+0x1a/0x1f
+[ 1226.435167] Code: dc 00 00 49 8b 50 08 4d 8b 20 49 8b 40 10 4d 85 e4 0f 84 ac 00 00 00 48 85 c0 0f 84 a3 00 00 00 49 63 47 20 48 8d 4a 01 4d 8b 07 <49> 8b 1c 04 4c 89 e0 65 49 0f c7 08 0f 94 c0 84 c0 74 b9 49 63 
+[ 1226.435191] RIP  [<ffffffff811a568d>] __kmalloc+0x8d/0x190
+[ 1226.435193]  RSP <ffff880756809d88>
+[ 1226.435195] ---[ end trace 409b15b8da5879ec ]---
+[ 1226.435393] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[ 1226.435507] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[ 1226.435632] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[ 1226.435757] xhci_hcd 0000:00:14.0: ERROR Transfer event TRB DMA ptr not part of current TD
+[ 1226.435760] xhci_hcd 0000:00:14.0: ERROR Transfer event TRB DMA ptr not part of current TD
