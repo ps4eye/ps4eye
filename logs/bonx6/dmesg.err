@@ -1,0 +1,46 @@
+[  138.531016] xhci_hcd 0000:00:14.0: ERROR Transfer event TRB DMA ptr not part of current TD
+[  138.531021] xhci_hcd 0000:00:14.0: ERROR Transfer event TRB DMA ptr not part of current TD
+[  138.531278] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[  138.531398] xhci_hcd 0000:00:14.0: ERROR Unknown event condition, HC probably busted
+[  143.491070] usb 4-1: USB disconnect, device number 6
+[  150.210036] general protection fault: 0000 [#2] SMP 
+[  150.210044] Modules linked in: vmw_vsock_vmci_transport vsock vmw_vmci parport_pc ppdev bnep rfcomm bluetooth binfmt_misc dm_crypt joydev ip6t_REJECT xt_hl snd_hda_codec_hdmi ip6t_rt nf_conntrack_ipv6 nf_defrag_ipv6 ipt_REJECT xt_LOG xt_limit xt_tcpudp xt_addrtype nf_conntrack_ipv4 nf_defrag_ipv4 xt_conntrack x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel kvm crct10dif_pclmul crc32_pclmul ghash_clmulni_intel arc4 aesni_intel aes_x86_64 lrw gf128mul glue_helper ablk_helper cryptd iwldvm wacom mac80211 ip6table_filter mxm_wmi ip6_tables nf_conntrack_netbios_ns nf_conntrack_broadcast nf_nat_ftp nf_nat nf_conntrack_ftp nf_conntrack iptable_filter ip_tables x_tables dm_multipath scsi_dh microcode snd_hda_codec_realtek snd_seq_midi iwlwifi psmouse snd_seq_midi_event snd_rawmidi serio_raw snd_hda_intel cfg80211 snd_hda_codec snd_hwdep lpc_ich snd_pcm rtsx_pci_ms memstick snd_page_alloc snd_seq mei_me nvidia(POF) mei snd_seq_device snd_timer snd soundcore wmi mac_hid lp parport btrfs zlib_deflate raid6_pq libcrc32c dm_raid45 xor dm_mirror dm_region_hash dm_log vesafb(F) usbhid hid mmc_block rtsx_pci_sdmmc ahci r8169 rtsx_pci libahci mii video
+[  150.210152] CPU: 0 PID: 3142 Comm: emacs Tainted: PF     D    O 3.11.0-17-generic #31-Ubuntu
+[  150.210156] Hardware name: System76, Inc.                      Bonobo Extreme      /Bonobo Extreme, BIOS 4.6.5 11/13/2012
+[  150.210159] task: ffff8807bf619770 ti: ffff8807c400c000 task.ti: ffff8807c400c000
+[  150.210162] RIP: 0010:[<ffffffff81191503>]  [<ffffffff81191503>] __kmalloc_node_track_caller+0xe3/0x1d0
+[  150.210172] RSP: 0018:ffff8807c400daa8  EFLAGS: 00010246
+[  150.210175] RAX: 0000000000000000 RBX: ffff8807eec0f700 RCX: 0000000000000137
+[  150.210177] RDX: 0000000000000136 RSI: 0000000000000000 RDI: 0000000000017480
+[  150.210180] RBP: ffff8807c400dae8 R08: ffff88081ec17480 R09: ffff8807fe003200
+[  150.210182] R10: ffff8807c400dd08 R11: 00000000000013fc R12: 00000000000106d0
+[  150.210185] R13: d1d0270678344c0c R14: 0000000000001540 R15: 00000000ffffffff
+[  150.210188] FS:  00007f320ad86a40(0000) GS:ffff88081ec00000(0000) knlGS:0000000000000000
+[  150.210191] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  150.210193] CR2: 0000000002aab000 CR3: 00000007c41df000 CR4: 00000000001407f0
+[  150.210196] Stack:
+[  150.210198]  ffff8807c400dad8 ffff8807fe003200 ffffffff815e29ae ffff8807eec0f700
+[  150.210204]  ffff8807c400db47 00000000000004d0 0000000000001540 00000000ffffffff
+[  150.210209]  ffff8807c400db28 ffffffff815e21f1 ffffffff815e297e ffff8807eec0f700
+[  150.210214] Call Trace:
+[  150.210223]  [<ffffffff815e29ae>] ? __alloc_skb+0x7e/0x2a0
+[  150.210228]  [<ffffffff815e21f1>] __kmalloc_reserve.isra.26+0x31/0x90
+[  150.210233]  [<ffffffff815e297e>] ? __alloc_skb+0x4e/0x2a0
+[  150.210237]  [<ffffffff815e29ae>] __alloc_skb+0x7e/0x2a0
+[  150.210244]  [<ffffffff815ddbe6>] sock_alloc_send_pskb+0x1c6/0x340
+[  150.210250]  [<ffffffff815ddd75>] sock_alloc_send_skb+0x15/0x20
+[  150.210256]  [<ffffffff8168454b>] unix_stream_sendmsg+0x26b/0x410
+[  150.210262]  [<ffffffff815d9507>] sock_aio_write+0x137/0x150
+[  150.210268]  [<ffffffff811ba9a0>] ? poll_select_copy_remaining+0x130/0x130
+[  150.210275]  [<ffffffff811a76bc>] do_sync_readv_writev+0x6c/0xa0
+[  150.210281]  [<ffffffff811a8b2b>] do_readv_writev+0xbb/0x230
+[  150.210288]  [<ffffffff816ee8b5>] ? _raw_spin_lock_irq+0x15/0x20
+[  150.210295]  [<ffffffff811f138d>] ? eventfd_read+0x3d/0x70
+[  150.210300]  [<ffffffff811a8d35>] vfs_writev+0x35/0x60
+[  150.210306]  [<ffffffff811a8e69>] SyS_writev+0x49/0xc0
+[  150.210310]  [<ffffffff811bc035>] ? SyS_poll+0x65/0x100
+[  150.210317]  [<ffffffff816f74dd>] system_call_fastpath+0x1a/0x1f
+[  150.210319] Code: 00 49 63 41 18 0f 1f 44 00 00 4c 89 e8 48 83 c4 18 5b 41 5c 41 5d 41 5e 41 5f 5d c3 0f 1f 40 00 49 63 41 20 48 8d 4a 01 49 8b 39 <49> 8b 5c 05 00 4c 89 e8 65 48 0f c7 0f 0f 94 c0 84 c0 0f 84 61 
+[  150.210367] RIP  [<ffffffff81191503>] __kmalloc_node_track_caller+0xe3/0x1d0
+[  150.210371]  RSP <ffff8807c400daa8>
+[  150.210376] ---[ end trace 25d2edf6b604d2db ]---

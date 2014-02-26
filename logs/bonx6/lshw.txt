@@ -1,0 +1,140 @@
+$ sudo lshw -sanitize -class system -class memory -class bus
+computer                  
+    description: Notebook
+    product: Bonobo Extreme (Not Applicable)
+    vendor: System76, Inc.
+    version: bonx6
+    serial: [REMOVED]
+    width: 64 bits
+    capabilities: smbios-2.7 dmi-2.7 vsyscall32
+    configuration: boot=normal chassis=notebook family=Not Applicable sku=Not Applicable uuid=[REMOVED]
+  *-core
+       description: Motherboard
+       product: Bonobo Extreme
+       vendor: System76, Inc.
+       physical id: 0
+       version: bonx6
+       serial: [REMOVED]
+       slot: Not Applicable
+     *-firmware
+          description: BIOS
+          vendor: American Megatrends Inc.
+          physical id: 0
+          version: 4.6.5
+          date: 11/13/2012
+          size: 64KiB
+          capacity: 4032KiB
+          capabilities: pci upgrade shadowing cdboot bootselect socketedrom edd int13floppy1200 int13floppy720 int13floppy2880 int5printscreen int9keyboard int14serial int17printer acpi usb biosbootspecification uefi
+     *-cache:0
+          description: L2 cache
+          physical id: 10
+          slot: CPU Internal L2
+          size: 1MiB
+          capacity: 1MiB
+          capabilities: internal write-through unified
+     *-cache:1
+          description: L1 cache
+          physical id: 11
+          slot: CPU Internal L1
+          size: 256KiB
+          capacity: 256KiB
+          capabilities: internal write-through data
+     *-cache:2
+          description: L3 cache
+          physical id: 12
+          slot: CPU Internal L3
+          size: 6MiB
+          capacity: 6MiB
+          capabilities: internal write-back unified
+     *-memory
+          description: System Memory
+          physical id: 13
+          slot: System board or motherboard
+          size: 32GiB
+        *-bank:0
+             description: SODIMM DDR3 Synchronous 1600 MHz (0.6 ns)
+             product: PSD38G16002S
+             vendor: 8502
+             physical id: 0
+             serial: [REMOVED]
+             slot: ChannelA-DIMM0
+             size: 8GiB
+             width: 64 bits
+             clock: 1600MHz (0.6ns)
+        *-bank:1
+             description: SODIMM DDR3 Synchronous 1600 MHz (0.6 ns)
+             product: PSD38G16002S
+             vendor: 8502
+             physical id: 1
+             serial: [REMOVED]
+             slot: ChannelA-DIMM1
+             size: 8GiB
+             width: 64 bits
+             clock: 1600MHz (0.6ns)
+        *-bank:2
+             description: SODIMM DDR3 Synchronous 1600 MHz (0.6 ns)
+             product: PSD38G16002S
+             vendor: 8502
+             physical id: 2
+             serial: [REMOVED]
+             slot: ChannelB-DIMM0
+             size: 8GiB
+             width: 64 bits
+             clock: 1600MHz (0.6ns)
+        *-bank:3
+             description: SODIMM DDR3 Synchronous 1600 MHz (0.6 ns)
+             product: PSD38G16002S
+             vendor: 8502
+             physical id: 3
+             serial: [REMOVED]
+             slot: ChannelB-DIMM1
+             size: 8GiB
+             width: 64 bits
+             clock: 1600MHz (0.6ns)
+  *-usb:0
+       description: USB controller
+       product: 7 Series/C210 Series Chipset Family USB xHCI Host Controller
+       vendor: Intel Corporation
+       physical id: 14
+       bus info: pci@0000:00:14.0
+       version: 04
+       width: 64 bits
+       clock: 33MHz
+       capabilities: pm msi xhci bus_master cap_list
+       configuration: driver=xhci_hcd latency=0
+       resources: irq:43 memory:f7300000-f730ffff
+  *-usb:1
+       description: USB controller
+       product: 7 Series/C210 Series Chipset Family USB Enhanced Host Controller #2
+       vendor: Intel Corporation
+       physical id: 1a
+       bus info: pci@0000:00:1a.0
+       version: 04
+       width: 32 bits
+       clock: 33MHz
+       capabilities: pm debug ehci bus_master cap_list
+       configuration: driver=ehci-pci latency=0
+       resources: irq:16 memory:f7318000-f73183ff
+  *-usb:2
+       description: USB controller
+       product: 7 Series/C210 Series Chipset Family USB Enhanced Host Controller #1
+       vendor: Intel Corporation
+       physical id: 1d
+       bus info: pci@0000:00:1d.0
+       version: 04
+       width: 32 bits
+       clock: 33MHz
+       capabilities: pm debug ehci bus_master cap_list
+       configuration: driver=ehci-pci latency=0
+       resources: irq:23 memory:f7317000-f73173ff
+  *-serial UNCLAIMED
+       description: SMBus
+       product: 7 Series/C210 Series Chipset Family SMBus Controller
+       vendor: Intel Corporation
+       physical id: 1f.3
+       bus info: pci@0000:00:1f.3
+       version: 04
+       width: 64 bits
+       clock: 33MHz
+       configuration: latency=0
+       resources: memory:f7315000-f73150ff ioport:f000(size=32)
