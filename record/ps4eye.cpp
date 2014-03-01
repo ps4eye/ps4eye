@@ -1,7 +1,8 @@
 #include "ps4eye.h"
+#include "libusb.h"
 #include <iomanip>
 #include <unistd.h>
-
+#define debug(x...) fprintf(stdout,x)
 using namespace std;
 
 /**
@@ -19,7 +20,7 @@ ps4eye::ps4eye() {
   samplerate = 48000;
 
   // just take something bigger, that fits
-  buffersize = 81920;
+  buffersize = 5571968;
 
   // create a usb control trasfer packet. This is used to send commands to the device.
   control_transfer = libusb_alloc_transfer(0);
@@ -64,7 +65,7 @@ void ps4eye::setup_usb() {
   if (error < 0) {
     exit(error);
   }
-  //libusb_set_debug(context, 3);
+  libusb_set_debug(context, 3);
 
   handle = libusb_open_device_with_vid_pid(context, 0x05a9, 0x058a);
   if (handle == NULL) {
@@ -88,8 +89,7 @@ void ps4eye::setup_usb() {
     if (libusb_kernel_driver_active(handle, 1))
       exit(1);
   }
-
-  //libusb_set_debug(context, 5);
+ // libusb_set_debug(context, 5);
 }
 
 /**
@@ -111,20 +111,20 @@ void ps4eye::release_usb() {
  * driver connects to the device.
  * What these commands mean is mostly unknown to me.
 
- * The most interesting part from the users point of view is setting the samplerate.
  */
 void ps4eye::init_usb() {
   // reset usb communication
   libusb_reset_device(handle);
   libusb_set_configuration(handle, 1);
   libusb_ref_device(dev);
+  libusb_set_interface_alt_setting(handle, 0, 1);
   libusb_claim_interface(handle, 0);
   libusb_claim_interface(handle, 1);
-  //libusb_set_interface_alt_setting(handle, 0, 1);
   libusb_set_interface_alt_setting(handle, 1, 1);
-
+  
+  
   usleep(1000);
-
+ 
   ifstream commands("startup.bin", ios::in | ios::binary);
   uint data_size = 64;
   uchar *data = (uchar*)malloc(data_size+8);
@@ -134,7 +134,7 @@ void ps4eye::init_usb() {
 
   if (!commands.is_open()) {
     cout << "unable to open commands file" << endl;
-    exit(-1);
+    abort = true;
   }
 
   // command #667 @ 0xbb38 turns led on
@@ -150,7 +150,7 @@ void ps4eye::init_usb() {
     uint16_t wIndex       = setup[4] + setup[5]*0x100;
     uint16_t wLength      = setup[6] + setup[7]*0x100;
 
-    cout << dec << cmd_index << " - "
+    cout << setfill('0') << dec << cmd_index << " - "
          << setw(4) << hex << (int)pos << " - "
          << setw(2) << hex << (int)bmRequestType << ":"
          << setw(2) << hex << (int)bRequest << ":"
@@ -164,20 +164,35 @@ void ps4eye::init_usb() {
       dev_data = (uchar*)realloc(data,wLength+8);
       data_size = wLength;
     }
-
     commands.read((char*)(data+8),wLength);
+/*
+    for (int i=0; i<wLength; i++) {
+      cout << hex << setw(2) << int(data[i]) << " ";
+    }
+    cout << endl;
+*/
 
-    if (cmd_index<=3 or (cmd_index>=669 and cmd_index<=715))
+//    if (cmd_index<=3 or (cmd_index>=669 and cmd_index<=715))
+
+    bool success = false;
+    while (!success && !abort) {
       usleep(3200);
+      submitAndWait_controlTransfer(bmRequestType, bRequest, wValue, wIndex, wLength,
+                                    (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
 
-    submitAndWait_controlTransfer(bmRequestType, bRequest, wValue, wIndex, wLength,
-                                  (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
+      success = true;
+      if (bmRequestType & LIBUSB_ENDPOINT_IN) {
+        for (int i=0; i<wLength; i++) {
+          if (dev_data[8+i] != data[8+i]) {
+            cout << dec << " diff @ " << i << " : " << setfill('0')
+                 << setw(2) << hex << (uint)dev_data[8+i] << " / " << setw(2) << hex << (uint)data[8+i] << endl;
+/*
+            submitAndWait_controlTransfer(0x40, bRequest, wValue, wIndex, wLength,
+                                          (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
 
-    if (bmRequestType & LIBUSB_ENDPOINT_IN) {
-      for (int i=0; i<wLength; i++) {
-        if (dev_data[8+i] != data[8+i]) {
-          cout << dec << " diff @ " << i << " : " << setfill('0')
-               << setw(2) << hex << (uint)dev_data[8+i] << " / " << setw(2) << hex << (uint)data[8+i] << endl;
+            success=false;
+*/
+          }
         }
       }
     }
@@ -237,7 +252,7 @@ void ps4eye::callback_controlTransfer(struct libusb_transfer * transfer) {
   ps4cam->controlTransferReturned = true;
   if (ps4cam->control_wLength != transfer->actual_length) {
     cout << "ERROR: " << transfer->actual_length << " / " << ps4cam->control_wLength << " bytes transferred" << endl;
-    exit(-1);
+    ps4cam->stop();
   }
 }
 
@@ -245,7 +260,7 @@ void ps4eye::callback_controlTransfer(struct libusb_transfer * transfer) {
  * Prepare a data packet, that sends video to the host using an isochronous transfer.
  */
 struct libusb_transfer * ps4eye::allocate_iso_input_transfer() {
-  struct libusb_transfer * transfer = libusb_alloc_transfer(40);
+  struct libusb_transfer * transfer = libusb_alloc_transfer(136);
 
   if (!transfer)
     exit(1);
@@ -255,21 +270,44 @@ struct libusb_transfer * ps4eye::allocate_iso_input_transfer() {
   transfer->dev_handle = this->handle;
   transfer->endpoint = 0x81;
   transfer->type = LIBUSB_TRANSFER_TYPE_ISOCHRONOUS;
-  transfer->timeout = 1000;
+  transfer->timeout = 100;
   transfer->buffer = video_in_buffer;
   memset(transfer->buffer, 0, buffersize);
   transfer->user_data = this;
-  transfer->length = 40960;
+  transfer->length = 5571968; //max size 
   transfer->callback = ps4eye::callback_videoin;
-  transfer->num_iso_packets = 40;
+  transfer->num_iso_packets = 136; //num isoc 
 
   for (unsigned int i = 0; i < transfer->num_iso_packets; i++) {
-    transfer->iso_packet_desc[i].length = 1024;
+    transfer->iso_packet_desc[i].length = 40*1024;
   }
 
   return transfer;
 }
+/**
+ * This method is called after a video packet has been transferred from the device.
+ * Avoid printf inside callback, try to call this instead
+ */
+void ps4eye::debug_callback(struct libusb_transfer * transfer)
+{
 
+  	int len=1024*40;
+	int length=0;
+	unsigned char* data=transfer->buffer;
+  	debug("begin debug callback\n");
+	for(int i=0; i<transfer->num_iso_packets; i++) 
+  	{
+	  	if(transfer->iso_packet_desc[i].actual_length!=0) 
+	  	{
+		  	debug("Package: %d \n",i); 
+			debug("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x len %d\n",data[0+len*i],data[1+len*i],data[2+len*i],data[3+len*i],data[4+len*i],data[5+len*i],data[6+len*i],data[7+len*i],data[8+len*i],data[9+len*i],data[10+len*i],data[11+len*i],transfer->iso_packet_desc[i].actual_length);
+	  	}
+		length=length+transfer->iso_packet_desc[i].actual_length;
+	  
+	}
+	debug("end debug callback bytes received %d\n",length);
+	
+}
 /**
  * This method is called after a video packet has been transferred from the device.
  * If the transfer fails, the device is reset. Request the next data packet afterwards.
@@ -277,18 +315,15 @@ struct libusb_transfer * ps4eye::allocate_iso_input_transfer() {
 void ps4eye::callback_videoin(struct libusb_transfer * transfer) {
 
   ps4eye * ps4cam = (ps4eye*) transfer->user_data;
-
+  unsigned char * data=transfer->buffer;
   // if the usb connection breaks down, resume it
   if (transfer->status != 0) {
-    ps4cam->resumePlayback();
+    debug("bad status transfer: %d\n",transfer->status);
+    //ps4cam->resumePlayback();
   }
-
-  for (int i=0; i<transfer->num_iso_packets; i++) {
-    if (transfer->iso_packet_desc->actual_length!=0) {
-      cout << "X";
-    }
-  }
-  cout << "." << flush;
+  debug_callback(transfer);
+    
+ // cout << "\n.\n" << flush;
 
 /*
   cout << setfill('0');
@@ -298,7 +333,6 @@ void ps4eye::callback_videoin(struct libusb_transfer * transfer) {
   cout << endl;
 */
   transfer->buffer = ps4cam->video_in_buffer;
-
   //usleep(1000);
   // Request next data packet.
   if (!ps4cam->abort)
