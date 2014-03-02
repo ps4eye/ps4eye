@@ -57,6 +57,8 @@ private:
 
   static void callback_controlTransfer(struct libusb_transfer * transfer);
 
+  static void debug_callback(struct libusb_transfer * transfer);
+
   static void callback_videoin(struct libusb_transfer * transfer);
 
   struct libusb_transfer * allocate_iso_input_transfer();
