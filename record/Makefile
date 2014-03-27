@@ -1,10 +1,11 @@
-export CPATH=/usr/include/libusb-1.0
+export CPATH=/usr/local/include/libusb-1.0
 TARGET=ps4eye
 SOURCE=main.cpp ps4eye.cpp
-LIBS=-lusb-1.0
+LIBS=-L/usr/local/lib -lusb-1.0
+CFLAGS+=-g
 
 ${TARGET}: ${SOURCE}
-	g++ -c $^
+	g++ -c ${CFLAGS} $^
 	g++ -o $@ $(^:%.cpp=%.o) ${LIBS}
 
 clean:

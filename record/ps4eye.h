@@ -44,6 +44,7 @@ private:
 
   struct libusb_transfer * video_transfer;
 
+  void firmware_upload();
   void init_usb();
   void setup_usb();
   void release_usb();

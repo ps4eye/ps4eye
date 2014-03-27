@@ -6,13 +6,13 @@ import sys
 # check if initialized device already exists
 dev = usb.core.find(idVendor=0x05a9, idProduct=0x058a)
 if dev is not None:
-    print 'PS4 camera already initialized'
+    print('PS4 camera already initialized')
     sys.exit()
 
 # find uninitialized device
 dev = usb.core.find(idVendor=0x05a9, idProduct=0x0580)
 if dev is None:
-    print 'PS4 camera not found'
+    print('PS4 camera not found')
     sys.exit()
 
 # set the active configuration. With no arguments, the first
@@ -41,10 +41,10 @@ for chunk in read_chunks(firmware, chunk_size):
         value=0
         index+=1
     if len(chunk)!=ret:
-        print "sent %d/%d bytes" % (ret,len(chunk))
+        print("sent %d/%d bytes" % (ret,len(chunk)))
 
 # command reboots device with new firmware and product id
 try:
     ret = dev.ctrl_transfer(0x40, 0x0, 0x2200, 0x8018, [0x5b])
 except:
-    print 'PS4 camera firmware uploaded and device reset'
+    print('PS4 camera firmware uploaded and device reset')

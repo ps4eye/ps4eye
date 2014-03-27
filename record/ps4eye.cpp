@@ -2,7 +2,7 @@
 #include "libusb.h"
 #include <iomanip>
 #include <unistd.h>
-#define debug(x...) fprintf(stdout,x)
+#define debug(x...)  //fprintf(stdout,x)
 using namespace std;
 
 /**
@@ -43,6 +43,8 @@ ps4eye::~ps4eye() {
 }
 
 void ps4eye::init() {
+  // check if firmware needs to be uploaded
+  firmware_upload();
   // initialize usb communication
   setup_usb();
   cout << "Initializing PS4 camera..." << endl;
@@ -53,6 +55,68 @@ void ps4eye::init() {
 
 void ps4eye::stop() {
   abort = true;
+}
+
+void ps4eye::firmware_upload() {
+
+  int error;
+  error = libusb_init(&context);
+  if (error < 0) {
+    exit(error);
+  }
+  libusb_set_debug(context, 3);
+
+  handle = libusb_open_device_with_vid_pid(context, 0x05a9, 0x0580);
+  if (handle == NULL) {
+    return;
+  }
+  dev = libusb_get_device(handle);
+
+  libusb_reset_device(handle);
+  libusb_set_configuration(handle, 0);
+  libusb_ref_device(dev);
+  libusb_claim_interface(handle, 0);
+
+  cout << "Uploading firmware to PS4 camera..." << endl;
+
+  uint16_t chunk_size = 512;
+
+  uchar chunk[chunk_size+8];
+
+  ifstream file ("firmware.bin", ios::in|ios::binary|ios::ate);
+  if (file.is_open())
+  {
+    uint32_t length = file.tellg();
+    file.seekg (0, ios::beg);
+
+    uint16_t index=0x14;
+    uint16_t value=0;
+
+    for (uint32_t pos=0; pos<length; pos+=chunk_size) {
+      uint16_t size = ( chunk_size > (length-pos) ? (length-pos) : chunk_size);
+      file.read ((char*)(chunk+8), size);
+      submitAndWait_controlTransfer(0x40, 0x0, value, index, size, chunk);
+      value+=chunk_size;
+      if (value==0) index+=1;
+    }
+    file.close();
+
+    chunk[8] = 0x5b;
+    submit_controlTransfer(0x40, 0x0, 0x2200, 0x8018, 1, chunk);
+    usleep(1000000);
+    libusb_cancel_transfer(control_transfer);
+
+    cout << "Firmware transferred and device reset, run again to record." << endl;
+  } else {
+    cout << "Unable to open firmware.bin!" << endl;
+  }
+
+  libusb_release_interface(handle, 0);
+  libusb_unref_device(dev);
+  libusb_close(handle);
+  libusb_exit(context);
+
+  exit(0);
 }
 
 /**
