@@ -33,11 +33,13 @@ int main(void)
 {
   ps4cam = new ps4eye;
 
+#ifndef _MBCS // ignore signals in msvc
   struct sigaction sigact;
   sigact.sa_handler = signal_handler;
   sigemptyset(&sigact.sa_mask);
   sigact.sa_flags = 0;
   sigaction(SIGINT, &sigact, NULL);
+#endif
 
   // setup usb configuration
   ps4cam->init();

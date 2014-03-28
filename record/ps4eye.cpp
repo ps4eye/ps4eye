@@ -2,8 +2,12 @@
 
 #include <iomanip>
 #include <unistd.h>
-#define debug(x...)  fprintf(stdout,x)
+
+#define debug(...) fprintf(stdout,__VA_ARGS__)
+
 using namespace std;
+
+#define CHUNK_SIZE 512
 
 /**
  * Initialize variables and USB communication.
@@ -77,9 +81,7 @@ void ps4eye::firmware_upload() {
 
   cout << "Uploading firmware to PS4 camera..." << endl;
 
-  uint16_t chunk_size = 512;
-
-  uchar chunk[chunk_size+8];
+  uchar chunk[CHUNK_SIZE+8];
 
   ifstream firmware("firmware.bin", ios::in|ios::binary|ios::ate);
   if (firmware.is_open())
@@ -90,8 +92,8 @@ void ps4eye::firmware_upload() {
     uint16_t index=0x14;
     uint16_t value=0;
 
-    for (uint32_t pos=0; pos<length; pos+=chunk_size) {
-      uint16_t size = ( chunk_size > (length-pos) ? (length-pos) : chunk_size);
+    for (uint32_t pos=0; pos<length; pos+=CHUNK_SIZE) {
+      uint16_t size = ( CHUNK_SIZE > (length-pos) ? (length-pos) : CHUNK_SIZE);
       firmware.read((char*)(chunk+8), size);
       submitAndWait_controlTransfer(0x40, 0x0, value, index, size, chunk);
       if ( ((uint32_t)value + size) > 0xFFFF ) index+=1;
