@@ -2,7 +2,7 @@
 #include "libusb.h"
 #include <iomanip>
 #include <unistd.h>
-#define debug(x...)  //fprintf(stdout,x)
+#define debug(x...)  fprintf(stdout,x)
 using namespace std;
 
 /**
@@ -83,23 +83,23 @@ void ps4eye::firmware_upload() {
 
   uchar chunk[chunk_size+8];
 
-  ifstream file ("firmware.bin", ios::in|ios::binary|ios::ate);
-  if (file.is_open())
+  ifstream firmware("firmware.bin", ios::in|ios::binary|ios::ate);
+  if (firmware.is_open())
   {
-    uint32_t length = file.tellg();
-    file.seekg (0, ios::beg);
+    uint32_t length = firmware.tellg();
+    firmware.seekg(0, ios::beg);
 
     uint16_t index=0x14;
     uint16_t value=0;
 
     for (uint32_t pos=0; pos<length; pos+=chunk_size) {
       uint16_t size = ( chunk_size > (length-pos) ? (length-pos) : chunk_size);
-      file.read ((char*)(chunk+8), size);
+      firmware.read((char*)(chunk+8), size);
       submitAndWait_controlTransfer(0x40, 0x0, value, index, size, chunk);
-      value+=chunk_size;
-      if (value==0) index+=1;
+      if ( ((uint32_t)value + size) > 0xFFFF ) index+=1;
+      value+=size;
     }
-    file.close();
+    firmware.close();
 
     chunk[8] = 0x5b;
     submit_controlTransfer(0x40, 0x0, 0x2200, 0x8018, 1, chunk);
@@ -181,11 +181,10 @@ void ps4eye::init_usb() {
   libusb_reset_device(handle);
   libusb_set_configuration(handle, 1);
   libusb_ref_device(dev);
-  libusb_set_interface_alt_setting(handle, 0, 1);
-  libusb_claim_interface(handle, 0);
+  //libusb_claim_interface(handle, 0);
   libusb_claim_interface(handle, 1);
+  //libusb_set_interface_alt_setting(handle, 0, 1);
   libusb_set_interface_alt_setting(handle, 1, 1);
-
 
   usleep(1000);
 
@@ -229,34 +228,18 @@ void ps4eye::init_usb() {
       data_size = wLength;
     }
     commands.read((char*)(data+8),wLength);
-/*
-  for (int i=0; i<wLength; i++) {
-  cout << hex << setw(2) << int(data[i]) << " ";
-  }
-  cout << endl;
-*/
-
-//    if (cmd_index<=3 or (cmd_index>=669 and cmd_index<=715))
 
     bool success = false;
-    while (!success && !abort) {
-      usleep(3200);
-      submitAndWait_controlTransfer(bmRequestType, bRequest, wValue, wIndex, wLength,
-                                    (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
+    usleep(3200);
+    submitAndWait_controlTransfer(bmRequestType, bRequest, wValue, wIndex, wLength,
+                                  (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
 
-      success = true;
-      if (bmRequestType & LIBUSB_ENDPOINT_IN) {
-        for (int i=0; i<wLength; i++) {
-          if (dev_data[8+i] != data[8+i]) {
-            cout << dec << " diff @ " << i << " : " << setfill('0')
-                 << setw(2) << hex << (uint)dev_data[8+i] << " / " << setw(2) << hex << (uint)data[8+i] << endl;
-/*
-  submitAndWait_controlTransfer(0x40, bRequest, wValue, wIndex, wLength,
-  (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
-
-  success=false;
-*/
-          }
+    success = true;
+    if (bmRequestType & LIBUSB_ENDPOINT_IN) {
+      for (int i=0; i<wLength; i++) {
+        if (dev_data[8+i] != data[8+i]) {
+          cout << dec << " diff @ " << i << " : " << setfill('0')
+               << setw(2) << hex << (uint)dev_data[8+i] << " / " << setw(2) << hex << (uint)data[8+i] << endl;
         }
       }
     }
@@ -358,7 +341,7 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
   int len=1024*40;
   int length=0;
   unsigned char* data=transfer->buffer;
-  debug("begin debug callback\n");
+  //debug("begin debug callback\n");
   for(int i=0; i<transfer->num_iso_packets; i++)
   {
     if(transfer->iso_packet_desc[i].actual_length!=0)
@@ -369,7 +352,8 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
     length=length+transfer->iso_packet_desc[i].actual_length;
 
   }
-  debug("end debug callback bytes received %d\n",length);
+  if (length!=0)
+    debug("end debug callback bytes received %d\n",length);
 
 }
 /**
@@ -387,17 +371,8 @@ void ps4eye::callback_videoin(struct libusb_transfer * transfer) {
   }
   debug_callback(transfer);
 
-  // cout << "\n.\n" << flush;
-
-/*
-  cout << setfill('0');
-  for (int i=0; i<transfer->length; i++) {
-  cout << setw(2) << hex << (int)transfer->buffer[i] << " ";
-  }
-  cout << endl;
-*/
   transfer->buffer = ps4cam->video_in_buffer;
-  //usleep(1000);
+
   // Request next data packet.
   if (!ps4cam->abort)
     libusb_submit_transfer(transfer);
