@@ -138,20 +138,14 @@ void ps4eye::setup_usb() {
   }
   dev = libusb_get_device(handle);
 
-  error = libusb_kernel_driver_active(handle, 0);
-  if (error) {
-    cout << "Kernel driver active for interface 0: " << (int) error << endl;
-    libusb_detach_kernel_driver(handle, 0);
-    if (libusb_kernel_driver_active(handle, 0))
-      exit(1);
-  }
-
   error = libusb_kernel_driver_active(handle, 1);
   if (error) {
-    cout << "Kernel driver active for interface 1: " << (int) error << endl;
-    libusb_detach_kernel_driver(handle, 0);
+    cout << "WARNING: Kernel driver active for interface 1: " << (int) error << endl;
+    /*
+    libusb_detach_kernel_driver(handle, 1);
     if (libusb_kernel_driver_active(handle, 1))
       exit(1);
+    */
   }
   // libusb_set_debug(context, 5);
 }
@@ -385,7 +379,7 @@ void ps4eye::callback_videoin(struct libusb_transfer * transfer) {
 void ps4eye::play() {
   if (abort)
     return;
-
+  debug("begin debug playback\n");
   video_transfer = allocate_iso_input_transfer();
   if (libusb_submit_transfer(video_transfer) < 0)
     printf("Submitting play transfers failed.");
