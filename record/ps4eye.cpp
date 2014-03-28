@@ -1,5 +1,5 @@
 #include "ps4eye.h"
-#include "libusb.h"
+
 #include <iomanip>
 #include <unistd.h>
 #define debug(x...)  fprintf(stdout,x)
@@ -285,7 +285,7 @@ void ps4eye::submit_controlTransfer(uint8_t bmRequestType,
   libusb_fill_control_setup(buffer, bmRequestType, bRequest,
                             wValue, wIndex, wLength);
   libusb_fill_control_transfer(control_transfer, handle, buffer,
-                               callback_controlTransfer, NULL, 1000);
+                               (libusb_transfer_cb_fn)callback_controlTransfer, NULL, 1000);
   control_transfer->user_data = this;
   control_wLength = wLength;
   libusb_submit_transfer(control_transfer);
@@ -322,7 +322,7 @@ struct libusb_transfer * ps4eye::allocate_iso_input_transfer() {
   memset(transfer->buffer, 0, buffersize);
   transfer->user_data = this;
   transfer->length = 5571968; //max size
-  transfer->callback = ps4eye::callback_videoin;
+  transfer->callback = (libusb_transfer_cb_fn)ps4eye::callback_videoin;
   transfer->num_iso_packets = 136; //num isoc
 
   for (unsigned int i = 0; i < transfer->num_iso_packets; i++) {
