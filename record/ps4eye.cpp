@@ -48,9 +48,7 @@ void ps4eye::init() {
   // initialize usb communication
   setup_usb();
   cout << "Initializing PS4 camera..." << endl;
-  usleep(2000);
-  // initialize device
-  init_usb();
+  startup_commands();
 }
 
 void ps4eye::stop() {
@@ -148,6 +146,19 @@ void ps4eye::setup_usb() {
     */
   }
   // libusb_set_debug(context, 5);
+
+  usleep(2000);
+
+  // reset usb communication
+  libusb_reset_device(handle);
+  libusb_set_configuration(handle, 1);
+  libusb_ref_device(dev);
+  //libusb_claim_interface(handle, 0);
+  libusb_claim_interface(handle, 1);
+  //libusb_set_interface_alt_setting(handle, 0, 1);
+  libusb_set_interface_alt_setting(handle, 1, 1);
+
+  usleep(1000);
 }
 
 /**
@@ -170,18 +181,7 @@ void ps4eye::release_usb() {
  * What these commands mean is mostly unknown to me.
 
  */
-void ps4eye::init_usb() {
-  // reset usb communication
-  libusb_reset_device(handle);
-  libusb_set_configuration(handle, 1);
-  libusb_ref_device(dev);
-  //libusb_claim_interface(handle, 0);
-  libusb_claim_interface(handle, 1);
-  //libusb_set_interface_alt_setting(handle, 0, 1);
-  libusb_set_interface_alt_setting(handle, 1, 1);
-
-  usleep(1000);
-
+void ps4eye::startup_commands() {
   ifstream commands("startup.bin", ios::in | ios::binary);
   uint data_size = 64;
   uchar *data = (uchar*)malloc(data_size+8);
