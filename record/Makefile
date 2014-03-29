@@ -1,7 +1,8 @@
-export CPATH=/usr/local/include/libusb-1.0
+export CPATH=../libusb/include/libusb-1.0
 TARGET=ps4eye
 SOURCE=main.cpp ps4eye.cpp
-LIBS=-L/usr/local/lib -lusb-1.0
+DEPENDS=$(grep '^dependency_libs=' ../libusb/lib/libusb-1.0.la | cut -f2 -d=)
+LIBS=../libusb/lib/libusb-1.0.a ${DEPENDS}
 CFLAGS+=-g
 
 ${TARGET}: ${SOURCE}

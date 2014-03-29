@@ -24,6 +24,8 @@ public:
   void play();
   void stop();
 
+  ofstream * datadump;
+
 private:
 
   bool returned;
@@ -41,6 +43,7 @@ private:
   uchar * video_in_buffer;
   unsigned long int buffersize;
   unsigned int control_wLength;
+  size_t num_packets;
 
   struct libusb_transfer * video_transfer;
 
@@ -62,6 +65,6 @@ private:
 
   static void callback_videoin(struct libusb_transfer * transfer);
 
-  struct libusb_transfer * allocate_iso_input_transfer();
+  struct vector<libusb_transfer*> allocate_iso_input_transfers(int num_transfers);
 };
 

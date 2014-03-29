@@ -33,7 +33,7 @@ int main(void)
 {
   ps4cam = new ps4eye;
 
-#ifndef _MBCS // ignore signals in msvc
+#if !defined(_MBCS) // ignore signals in windows
   struct sigaction sigact;
   sigact.sa_handler = signal_handler;
   sigemptyset(&sigact.sa_mask);
