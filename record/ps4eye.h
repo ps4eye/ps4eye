@@ -25,6 +25,8 @@ public:
   void stop();
 
   ofstream * datadump;
+  size_t packet_size;
+  uchar * null_packet;
 
 private:
 

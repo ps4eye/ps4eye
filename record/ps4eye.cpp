@@ -26,9 +26,9 @@ ps4eye::ps4eye() {
   samplerate = 48000;
 
   // just take something bigger, that fits
-  buffersize = 6963200*2;
+  buffersize = 48*1024*120;
 
-  num_packets = 5440;
+  num_packets = 120;
 
   // create a usb control trasfer packet. This is used to send commands to the device.
   control_transfer = libusb_alloc_transfer(0);
@@ -309,7 +309,7 @@ void ps4eye::callback_controlTransfer(struct libusb_transfer * transfer) {
 struct vector<libusb_transfer*> ps4eye::allocate_iso_input_transfers(int num_transfers) {
 
   vector<libusb_transfer*> transfers;
-  size_t packet_size = libusb_get_max_iso_packet_size(dev, 0x81);
+  packet_size = 48*libusb_get_max_iso_packet_size(dev, 0x81);
   size_t transfer_size = num_packets*packet_size;
   uchar* ptr = video_in_buffer;
 
@@ -318,6 +318,8 @@ struct vector<libusb_transfer*> ps4eye::allocate_iso_input_transfers(int num_tra
     exit(1);
   }
 
+  null_packet = new uchar[packet_size];
+  memset(null_packet, 0, packet_size);
   memset(video_in_buffer, 0, buffersize);
 
   for (int n=0; n<num_transfers; n++) {
@@ -358,8 +360,9 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
 
   ps4eye * ps4cam = (ps4eye*) transfer->user_data;
 
-  int len=1024;
+  int len=ps4cam->packet_size;
   int length=0;
+  int data_length=0;
   unsigned char* data=transfer->buffer;
 
   //debug("begin debug callback\n");
@@ -367,6 +370,9 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
     if(transfer->iso_packet_desc[i].actual_length!=0) {
       ps4cam->datadump->write((char*)data+(len*i),transfer->iso_packet_desc[i].actual_length);
       ps4cam->datadump->flush();
+      if ( memcmp(data+(len*i), ps4cam->null_packet, len)!=0) {
+	data_length+=transfer->iso_packet_desc[i].actual_length;
+      }
       /*
 	debug("Package: %d \n",i);
 	debug("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x len %d\n",data[0+len*i],data[1+len*i],data[2+len*i],data[3+len*i],data[4+len*i],data[5+len*i],data[6+len*i],data[7+len*i],data[8+len*i],data[9+len*i],data[10+len*i],data[11+len*i],transfer->iso_packet_desc[i].actual_length);
@@ -375,7 +381,7 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
     length=length+transfer->iso_packet_desc[i].actual_length;
 
   }
-  cout << (length != 0 ? "." : "0") << flush;
+  cout << (length != 0 ? (data_length != 0 ? "+" : ".") : "0") << flush;
   //debug("end debug callback bytes received %d\n",length);
 }
 
@@ -396,6 +402,7 @@ void ps4eye::callback_videoin(struct libusb_transfer * transfer) {
   }
   debug_callback(transfer);
 
+  memset(transfer->buffer, 0, transfer->length);
   //transfer->buffer = ps4cam->video_in_buffer;
 
   // Request next data packet.
@@ -421,8 +428,10 @@ void ps4eye::play() {
   vector<libusb_transfer*> transfers = allocate_iso_input_transfers(1);
 
   for(vector<libusb_transfer*>::iterator it = transfers.begin(); it != transfers.end(); ++it, n++) {
-    if (libusb_submit_transfer(*it) < 0)
+    if (libusb_submit_transfer(*it) < 0) {
       cout << dec << "submitting play transfer " << n << " failed." << endl;
+      abort = true;
+    }
   }
 
   while (!abort) {
