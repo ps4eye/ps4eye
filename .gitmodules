@@ -1,3 +1,4 @@
 [submodule "libusb"]
 	path = libusb
-	url = https://github.com/ps4eye/libusb
+	url = https://github.com/ps4eye/libusb.git
+	branch = master
