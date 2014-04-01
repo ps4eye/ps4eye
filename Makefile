@@ -6,7 +6,7 @@ libusb:
 	if [ ! -d libusb ]; then \
 		git submodule init; \
 	fi;
-	git submodule update --remote;
+	git submodule update;
 	( \
 		cd libusb && \
 		./autogen.sh --prefix=`pwd` && \
