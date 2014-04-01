@@ -46,6 +46,7 @@ private:
   unsigned long int buffersize;
   unsigned int control_wLength;
   size_t num_packets;
+  size_t frame;
 
   struct libusb_transfer * video_transfer;
 

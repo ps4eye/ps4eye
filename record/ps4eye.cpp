@@ -1,5 +1,6 @@
 #include "ps4eye.h"
 
+#include <sstream>
 #include <iomanip>
 #include <unistd.h>
 
@@ -20,7 +21,7 @@ ps4eye::ps4eye() {
   returned = false;
   abort = false;
 
-  datadump = new ofstream("output.bin", ios::out | ios::binary);
+  //datadump = new ofstream("output.bin", ios::out | ios::binary);
 
   // hardcode samplerate. The device supports 44100, 48000
   samplerate = 48000;
@@ -29,6 +30,8 @@ ps4eye::ps4eye() {
   buffersize = 48*1024*120;
 
   num_packets = 120;
+
+  frame = 0;
 
   // create a usb control trasfer packet. This is used to send commands to the device.
   control_transfer = libusb_alloc_transfer(0);
@@ -89,29 +92,29 @@ void ps4eye::firmware_upload() {
 
   ifstream firmware("firmware.bin", ios::in|ios::binary|ios::ate);
   if (firmware.is_open())
-    {
-      uint32_t length = firmware.tellg();
-      firmware.seekg(0, ios::beg);
+  {
+    uint32_t length = firmware.tellg();
+    firmware.seekg(0, ios::beg);
 
-      uint16_t index=0x14;
-      uint16_t value=0;
+    uint16_t index=0x14;
+    uint16_t value=0;
 
-      for (uint32_t pos=0; pos<length; pos+=CHUNK_SIZE) {
-	uint16_t size = ( CHUNK_SIZE > (length-pos) ? (length-pos) : CHUNK_SIZE);
-	firmware.read((char*)(chunk+8), size);
-	submitAndWait_controlTransfer(0x40, 0x0, value, index, size, chunk);
-	if ( ((uint32_t)value + size) > 0xFFFF ) index+=1;
-	value+=size;
-      }
-      firmware.close();
+    for (uint32_t pos=0; pos<length; pos+=CHUNK_SIZE) {
+      uint16_t size = ( CHUNK_SIZE > (length-pos) ? (length-pos) : CHUNK_SIZE);
+      firmware.read((char*)(chunk+8), size);
+      submitAndWait_controlTransfer(0x40, 0x0, value, index, size, chunk);
+      if ( ((uint32_t)value + size) > 0xFFFF ) index+=1;
+      value+=size;
+    }
+    firmware.close();
 
-      chunk[8] = 0x5b;
-      submit_controlTransfer(0x40, 0x0, 0x2200, 0x8018, 1, chunk);
-      usleep(1000000);
-      libusb_cancel_transfer(control_transfer);
+    chunk[8] = 0x5b;
+    submit_controlTransfer(0x40, 0x0, 0x2200, 0x8018, 1, chunk);
+    usleep(1000000);
+    libusb_cancel_transfer(control_transfer);
 
-      cout << "Firmware transferred and device reset, run again to record." << endl;
-    } else {
+    cout << "Firmware transferred and device reset, run again to record." << endl;
+  } else {
     cout << "Unable to open firmware.bin!" << endl;
   }
 
@@ -230,7 +233,7 @@ void ps4eye::startup_commands() {
     commands.read((char*)(data+8),wLength);
 
     bool success = false;
-    usleep(3200);
+    usleep(10000);
     submitAndWait_controlTransfer(bmRequestType, bRequest, wValue, wIndex, wLength,
                                   (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
 
@@ -357,8 +360,11 @@ struct vector<libusb_transfer*> ps4eye::allocate_iso_input_transfers(int num_tra
  */
 void ps4eye::debug_callback(struct libusb_transfer * transfer)
 {
-
   ps4eye * ps4cam = (ps4eye*) transfer->user_data;
+
+  stringstream ss;
+  ss << "frame-" << (ps4cam->frame)++ << ".bin";
+  ofstream datadump(ss.str().c_str(), ios::out | ios::binary);
 
   int len=ps4cam->packet_size;
   int length=0;
@@ -368,20 +374,20 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
   //debug("begin debug callback\n");
   for(int i=0; i<transfer->num_iso_packets; i++) {
     if(transfer->iso_packet_desc[i].actual_length!=0) {
-      ps4cam->datadump->write((char*)data+(len*i),transfer->iso_packet_desc[i].actual_length);
-      ps4cam->datadump->flush();
+      datadump.write((char*)data+(len*i),transfer->iso_packet_desc[i].actual_length);
       if ( memcmp(data+(len*i), ps4cam->null_packet, len)!=0) {
-	data_length+=transfer->iso_packet_desc[i].actual_length;
+        data_length+=transfer->iso_packet_desc[i].actual_length;
       }
       /*
-	debug("Package: %d \n",i);
-	debug("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x len %d\n",data[0+len*i],data[1+len*i],data[2+len*i],data[3+len*i],data[4+len*i],data[5+len*i],data[6+len*i],data[7+len*i],data[8+len*i],data[9+len*i],data[10+len*i],data[11+len*i],transfer->iso_packet_desc[i].actual_length);
+        debug("Package: %d \n",i);
+        debug("0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x len %d\n",data[0+len*i],data[1+len*i],data[2+len*i],data[3+len*i],data[4+len*i],data[5+len*i],data[6+len*i],data[7+len*i],data[8+len*i],data[9+len*i],data[10+len*i],data[11+len*i],transfer->iso_packet_desc[i].actual_length);
       */
     }
     length=length+transfer->iso_packet_desc[i].actual_length;
 
   }
   cout << (length != 0 ? (data_length != 0 ? "+" : ".") : "0") << flush;
+  datadump.close();
   //debug("end debug callback bytes received %d\n",length);
 }
 
