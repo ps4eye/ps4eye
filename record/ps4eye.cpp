@@ -233,7 +233,7 @@ void ps4eye::startup_commands() {
     commands.read((char*)(data+8),wLength);
 
     bool success = false;
-    usleep(10000);
+    usleep(5000);
     submitAndWait_controlTransfer(bmRequestType, bRequest, wValue, wIndex, wLength,
                                   (bmRequestType & LIBUSB_ENDPOINT_IN ? dev_data : data));
 
@@ -312,7 +312,14 @@ void ps4eye::callback_controlTransfer(struct libusb_transfer * transfer) {
 struct vector<libusb_transfer*> ps4eye::allocate_iso_input_transfers(int num_transfers) {
 
   vector<libusb_transfer*> transfers;
-  packet_size = 48*libusb_get_max_iso_packet_size(dev, 0x81);
+
+  packet_size = libusb_get_max_iso_packet_size(dev, 0x81);
+
+  cout << dec << "Found max packet size " << packet_size << endl;
+
+  packet_size = 48*1024; //libusb_get_max_iso_packet_size(dev, 0x81);
+  cout << dec << " actually using packets of size " << packet_size << endl;
+
   size_t transfer_size = num_packets*packet_size;
   uchar* ptr = video_in_buffer;
 
@@ -360,11 +367,12 @@ struct vector<libusb_transfer*> ps4eye::allocate_iso_input_transfers(int num_tra
  */
 void ps4eye::debug_callback(struct libusb_transfer * transfer)
 {
+
   ps4eye * ps4cam = (ps4eye*) transfer->user_data;
 
   stringstream ss;
   ss << "frame-" << (ps4cam->frame)++ << ".bin";
-  ofstream datadump(ss.str().c_str(), ios::out | ios::binary);
+  //ofstream datadump(ss.str().c_str(), ios::out | ios::binary);
 
   int len=ps4cam->packet_size;
   int length=0;
@@ -374,7 +382,7 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
   //debug("begin debug callback\n");
   for(int i=0; i<transfer->num_iso_packets; i++) {
     if(transfer->iso_packet_desc[i].actual_length!=0) {
-      datadump.write((char*)data+(len*i),transfer->iso_packet_desc[i].actual_length);
+      //datadump.write((char*)data+(len*i),transfer->iso_packet_desc[i].actual_length);
       if ( memcmp(data+(len*i), ps4cam->null_packet, len)!=0) {
         data_length+=transfer->iso_packet_desc[i].actual_length;
       }
@@ -387,7 +395,7 @@ void ps4eye::debug_callback(struct libusb_transfer * transfer)
 
   }
   cout << (length != 0 ? (data_length != 0 ? "+" : ".") : "0") << flush;
-  datadump.close();
+  //datadump.close();
   //debug("end debug callback bytes received %d\n",length);
 }
 
